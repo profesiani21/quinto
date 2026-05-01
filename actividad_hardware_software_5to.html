@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hardware & Software – 5to Grado</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* =====================================================
+   DESIGN: Clean tech-academia — bold typography,
+   cool teal + deep indigo palette, crisp cards,
+   subtle animated grid. Feels modern but still
+   approachable for 10-11 year olds.
+===================================================== */
+:root {
+  --indigo:  #3730A3;
+  --indigo2: #4F46E5;
+  --teal:    #0D9488;
+  --teal2:   #14B8A6;
+  --amber:   #F59E0B;
+  --rose:    #F43F5E;
+  --green:   #10B981;
+  --bg:      #F1F5F9;
+  --surface: #FFFFFF;
+  --surface2:#F8FAFC;
+  --border:  #E2E8F0;
+  --text:    #0F172A;
+  --muted:   #64748B;
+  --correct: #10B981;
+  --wrong:   #F43F5E;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ── animated dot grid background ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: .55;
+}
+
+/* ── top gradient stripe ── */
+body::after {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 100;
+  background: linear-gradient(90deg, var(--indigo2), var(--teal2), var(--amber));
+}
+
+/* =====================
+   LAYOUT
+===================== */
+#app {
+  position: relative; z-index: 10;
+  max-width: 860px; margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* =====================
+   SCREEN TRANSITIONS
+===================== */
+.screen { display: none; }
+.screen.active {
+  display: block;
+  animation: fadeUp .45s cubic-bezier(.22,1,.36,1);
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================
+   HEADER CHIP
+===================== */
+.grade-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--indigo2); color: #fff;
+  padding: 6px 16px; border-radius: 999px;
+  font-size: .8rem; font-weight: 700; letter-spacing: .5px;
+  margin-bottom: 20px;
+}
+
+/* =====================
+   WELCOME SCREEN
+===================== */
+.welcome-hero {
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 24px rgba(55,48,163,.08);
+  padding: 48px 40px;
+  text-align: center;
+}
+
+.hero-icons {
+  display: flex; justify-content: center; gap: 16px;
+  margin-bottom: 24px;
+}
+.hero-icon {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  animation: float 3s ease-in-out infinite;
+}
+.hi-hw { background: linear-gradient(135deg,#EEF2FF,#C7D2FE); animation-delay: 0s; }
+.hi-sw { background: linear-gradient(135deg,#CCFBF1,#99F6E4); animation-delay: .4s; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+.welcome-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 800; color: var(--indigo); line-height: 1.1;
+  margin-bottom: 12px;
+}
+.welcome-title em { color: var(--teal); font-style: normal; }
+.welcome-desc {
+  font-size: 1.05rem; color: var(--muted); max-width: 520px;
+  margin: 0 auto 28px; line-height: 1.7;
+}
+
+/* score explanation box */
+.score-info-box {
+  display: inline-flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px 28px; margin-bottom: 32px;
+}
+.sib-item { text-align: center; }
+.sib-val {
+  font-family: 'Syne', sans-serif; font-size: 2rem;
+  font-weight: 800; color: var(--indigo2); line-height: 1;
+}
+.sib-lbl { font-size: .78rem; font-weight: 600; color: var(--muted); margin-top: 2px; }
+
+/* name row */
+.name-row { display: flex; gap: 12px; max-width: 440px; margin: 0 auto; }
+.name-inp {
+  flex: 1; padding: 14px 18px;
+  border: 2px solid var(--border); border-radius: 14px;
+  font-family: 'Outfit', sans-serif; font-size: 1rem;
+  font-weight: 600; color: var(--text); outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  background: var(--surface2);
+}
+.name-inp:focus { border-color: var(--indigo2); box-shadow: 0 0 0 4px rgba(79,70,229,.12); }
+.name-inp::placeholder { color: #94A3B8; font-weight: 500; }
+
+/* =====================
+   BUTTONS
+===================== */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 28px; border-radius: 12px; border: none;
+  font-family: 'Outfit', sans-serif; font-weight: 700;
+  font-size: 1rem; cursor: pointer;
+  transition: transform .15s, box-shadow .15s, opacity .15s;
+}
+.btn:hover  { transform: translateY(-2px); }
+.btn:active { transform: translateY(0) scale(.97); }
+.btn-indigo { background: var(--indigo2); color: #fff; box-shadow: 0 4px 16px rgba(79,70,229,.35); }
+.btn-teal   { background: var(--teal);    color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,.35); }
+.btn-amber  { background: var(--amber);   color: #fff; box-shadow: 0 4px 16px rgba(245,158,11,.35); }
+.btn-ghost  { background: var(--surface2); color: var(--indigo2); border: 2px solid var(--border); box-shadow: none; }
+.btn-lg { padding: 16px 36px; font-size: 1.1rem; border-radius: 14px; }
+.btn-sm { padding: 10px 20px; font-size: .9rem; }
+
+/* =====================
+   PROGRESS / HUD
+===================== */
+.hud {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 12px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+}
+.hud-name { font-weight: 700; color: var(--text); font-size: .95rem; flex: 1; }
+.hud-score {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 1rem; color: var(--indigo2);
+}
+.hud-stage {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 4px 12px;
+  font-size: .8rem; font-weight: 700; color: var(--muted);
+}
+
+.pbar-wrap {
+  height: 8px; background: var(--border); border-radius: 99px;
+  overflow: hidden; margin-bottom: 20px;
+}
+.pbar-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--indigo2), var(--teal2));
+  transition: width .5s cubic-bezier(.22,1,.36,1);
+  box-shadow: 0 0 8px rgba(79,70,229,.4);
+}
+
+/* =====================
+   SECTION HEADERS
+===================== */
+.sec-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px 28px 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  margin-bottom: 16px;
+}
+.sec-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .78rem; font-weight: 700; letter-spacing: .6px;
+  color: var(--teal); text-transform: uppercase; margin-bottom: 6px;
+}
+.sec-title {
+  font-family: 'Syne', sans-serif; font-size: 1.5rem;
+  font-weight: 800; color: var(--text); margin-bottom: 6px;
+}
+.sec-desc { font-size: .95rem; color: var(--muted); line-height: 1.6; }
+
+/* =====================
+   STAGE 1 — CLASSIFY (drag/click)
+===================== */
+.concept-banner {
+  background: linear-gradient(135deg, #EEF2FF, #E0F2FE);
+  border: 1px solid #C7D2FE; border-radius: 14px;
+  padding: 14px 18px; margin-bottom: 20px;
+  font-size: .92rem; color: #3730A3; font-weight: 600; line-height: 1.6;
+}
+.concept-banner strong { color: var(--teal); }
+
+.classify-pool {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 22px;
+}
+.cl-item {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 12px;
+  background: var(--surface2); border: 2px solid var(--border);
+  font-weight: 700; font-size: .95rem; color: var(--text);
+  cursor: pointer; transition: all .18s; user-select: none;
+}
+.cl-item:hover { border-color: var(--indigo2); background: #EEF2FF; transform: translateY(-1px); }
+.cl-item.placed { opacity: .35; pointer-events: none; }
+
+.classify-zones {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.cl-zone {
+  border-radius: 16px; padding: 16px;
+  border: 2px dashed var(--border); min-height: 140px;
+  transition: border-color .2s, background .2s;
+}
+.cl-zone.hw-zone { background: #FAFAFA; }
+.cl-zone.sw-zone { background: #FAFAFA; }
+.cl-zone.drag-over { border-color: var(--teal2); background: #CCFBF1; }
+
+.cl-zone-title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Syne', sans-serif; font-size: .95rem;
+  font-weight: 800; color: var(--indigo); margin-bottom: 12px;
+}
+.cl-zone-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.zi-hw { background: #EEF2FF; }
+.zi-sw { background: #CCFBF1; }
+
+.cl-dropped {
+  display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px;
+}
+.cl-dropped-item {
+  padding: 7px 14px; border-radius: 10px; font-weight: 700;
+  font-size: .88rem; cursor: pointer;
+  transition: all .2s;
+}
+.cl-dropped-item.pending { background: #FEF9C3; color: #713F12; border: 2px solid #FDE68A; }
+.cl-dropped-item.correct { background: #D1FAE5; color: #065F46; border: 2px solid #6EE7B7; }
+.cl-dropped-item.wrong   { background: #FFE4E6; color: #9F1239; border: 2px solid #FCA5A5; }
+
+/* =====================
+   STAGE 2 — QUIZ MCQ
+===================== */
+.q-progress {
+  display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.qp-pip {
+  height: 6px; flex: 1; border-radius: 99px;
+  background: var(--border); transition: background .3s;
+}
+.qp-pip.done { background: var(--indigo2); }
+.qp-pip.current { background: var(--teal2); }
+
+.q-panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+}
+.q-tag {
+  display: inline-block; padding: 3px 12px; border-radius: 6px;
+  font-size: .75rem; font-weight: 700; letter-spacing: .4px;
+  margin-bottom: 12px;
+}
+.tag-hw { background: #EEF2FF; color: var(--indigo); }
+.tag-sw { background: #CCFBF1; color: #0F766E; }
+
+.q-num  { font-size: .8rem; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.q-text {
+  font-family: 'Syne', sans-serif; font-size: 1.25rem;
+  font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 22px;
+}
+.q-image-row {
+  display: flex; justify-content: center; margin-bottom: 18px;
+}
+.q-emoji-img {
+  background: linear-gradient(135deg, #EEF2FF, #DBEAFE);
+  border: 2px solid #C7D2FE; border-radius: 16px;
+  padding: 16px 32px; font-size: 3rem; text-align: center;
+  letter-spacing: 12px;
+}
+
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opts.single-col { grid-template-columns: 1fr; }
+.opt {
+  padding: 14px 16px; border-radius: 12px;
+  border: 2px solid var(--border); background: var(--surface2);
+  font-family: 'Outfit', sans-serif; font-size: .95rem;
+  font-weight: 600; color: var(--text);
+  cursor: pointer; transition: all .18s; text-align: left;
+  line-height: 1.3;
+}
+.opt:hover:not(:disabled) {
+  border-color: var(--indigo2); background: #EEF2FF;
+  transform: translateY(-1px);
+}
+.opt.correct { background: #D1FAE5; border-color: var(--green); color: #065F46; animation: popY .35s; }
+.opt.wrong   { background: #FFE4E6; border-color: var(--rose);  color: #9F1239; animation: shakX .35s; }
+.opt:disabled { cursor: default; }
+@keyframes popY { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+@keyframes shakX { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+.q-feedback {
+  margin-top: 14px; padding: 12px 16px; border-radius: 12px;
+  font-size: .95rem; font-weight: 700;
+  opacity: 0; transform: translateY(6px); transition: all .3s;
+}
+.q-feedback.show { opacity: 1; transform: translateY(0); }
+.q-feedback.ok   { background: #D1FAE5; color: #065F46; border: 1px solid #6EE7B7; }
+.q-feedback.bad  { background: #FFE4E6; color: #9F1239; border: 1px solid #FCA5A5; }
+
+.next-row { display: flex; justify-content: flex-end; margin-top: 16px; }
+
+/* =====================
+   STAGE 3 — MATCH (connect pairs)
+===================== */
+.match-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+.match-col-title {
+  font-size: .78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--muted); margin-bottom: 10px;
+}
+.match-item {
+  padding: 12px 16px; border-radius: 12px;
+  border: 2px solid var(--border); background: var(--surface2);
+  font-weight: 600; font-size: .92rem; cursor: pointer;
+  transition: all .18s; margin-bottom: 8px; line-height: 1.3;
+}
+.match-item:hover { border-color: var(--indigo2); background: #EEF2FF; }
+.match-item.selected { border-color: var(--indigo2); background: #EEF2FF; box-shadow: 0 0 0 3px rgba(79,70,229,.2); }
+.match-item.matched-ok { border-color: var(--green); background: #D1FAE5; color: #065F46; cursor: default; }
+.match-item.matched-err { border-color: var(--rose); background: #FFE4E6; color: #9F1239; }
+
+.match-status {
+  text-align: center; font-weight: 700; font-size: .95rem;
+  padding: 10px; border-radius: 10px; margin-top: 14px;
+  transition: all .3s; display: none;
+}
+.match-status.show { display: block; }
+.match-status.ok  { background: #D1FAE5; color: #065F46; }
+.match-status.bad { background: #FFE4E6; color: #9F1239; }
+
+/* =====================
+   FINAL SCORECARD
+===================== */
+.result-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 24px; padding: 48px 40px;
+  box-shadow: 0 4px 32px rgba(0,0,0,.08); text-align: center;
+}
+.result-emoji { font-size: 80px; display: block; margin-bottom: 12px; }
+.result-title {
+  font-family: 'Syne', sans-serif; font-size: 2rem;
+  font-weight: 800; color: var(--indigo); margin-bottom: 8px;
+}
+.result-sub { font-size: 1rem; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+/* THE BIG SCORE DISPLAY */
+.score-card-wrap {
+  display: flex; justify-content: center; gap: 20px;
+  flex-wrap: wrap; margin-bottom: 28px;
+}
+.score-card {
+  background: linear-gradient(135deg, var(--indigo), var(--indigo2));
+  border-radius: 20px; padding: 24px 32px; color: white;
+  min-width: 150px; box-shadow: 0 8px 28px rgba(79,70,229,.35);
+}
+.score-card-val {
+  font-family: 'Syne', sans-serif; font-size: 3.5rem;
+  font-weight: 800; line-height: 1;
+}
+.score-card-den { font-size: 1.2rem; opacity: .7; }
+.score-card-lbl { font-size: .82rem; font-weight: 700; opacity: .8; margin-top: 4px; }
+
+.pct-card {
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-radius: 20px; padding: 24px 32px; color: white;
+  min-width: 150px; box-shadow: 0 8px 28px rgba(13,148,136,.35);
+}
+.pct-val {
+  font-family: 'Syne', sans-serif; font-size: 3.5rem;
+  font-weight: 800; line-height: 1;
+}
+.pct-lbl { font-size: .82rem; font-weight: 700; opacity: .8; margin-top: 4px; }
+
+/* breakdown table */
+.breakdown {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; margin-bottom: 24px;
+}
+.breakdown table { width: 100%; border-collapse: collapse; }
+.breakdown th {
+  background: var(--surface2); padding: 10px 16px;
+  font-size: .78rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .5px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.breakdown td { padding: 11px 16px; font-weight: 600; font-size: .92rem; border-bottom: 1px solid var(--border); }
+.breakdown tr:last-child td { border-bottom: none; }
+.badge-pts {
+  display: inline-block; padding: 2px 10px; border-radius: 6px;
+  font-size: .8rem; font-weight: 700;
+  background: #EEF2FF; color: var(--indigo2);
+}
+
+/* indicator box */
+.indicator-box {
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border: 1px solid #FDE68A; border-radius: 14px;
+  padding: 16px 20px; margin-bottom: 24px; text-align: left;
+}
+.ib-title { font-weight: 800; color: #92400E; font-size: .88rem; margin-bottom: 6px; }
+.ib-body  { font-size: .85rem; color: #78350F; line-height: 1.6; }
+
+/* confetti */
+.cpiece {
+  position: fixed; z-index: 500; pointer-events: none;
+  opacity: 0; border-radius: 3px;
+  animation: cfall ease-in forwards;
+}
+@keyframes cfall {
+  0%  { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+  100%{ opacity: 0; transform: translateY(110vh) rotate(720deg); }
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+@media(max-width: 600px) {
+  .welcome-hero { padding: 32px 20px; }
+  .classify-zones { grid-template-columns: 1fr; }
+  .opts { grid-template-columns: 1fr; }
+  .match-grid { grid-template-columns: 1fr; }
+  .score-card-wrap { gap: 12px; }
+  .q-text { font-size: 1.1rem; }
+  .sec-card { padding: 20px 16px; }
+  .name-row { flex-direction: column; }
+  .result-card { padding: 32px 20px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ════════════════════════════════════════
+     SCREEN 0 — WELCOME
+════════════════════════════════════════ -->
+<div class="screen active" id="s-welcome">
+  <div class="welcome-hero">
+    <div class="grade-chip">🎓 Quinto Grado de Primaria</div>
+    <div class="hero-icons">
+      <div class="hero-icon hi-hw">🖥️</div>
+      <div class="hero-icon hi-sw">💾</div>
+    </div>
+    <div class="welcome-title">
+      <em>Hardware</em> &amp; <em>Software</em><br>Tarea Digital Interactiva
+    </div>
+    <p class="welcome-desc">
+      Demuestra tus conocimientos sobre dispositivos de hardware mixtos (entrada/salida)
+      y software de ofimática. ¡Buena suerte!
+    </p>
+
+    <div class="score-info-box">
+      <div class="sib-item">
+        <div class="sib-val">3</div>
+        <div class="sib-lbl">Actividades</div>
+      </div>
+      <div class="sib-item">
+        <div class="sib-val">10</div>
+        <div class="sib-lbl">Puntuación máx.</div>
+      </div>
+      <div class="sib-item">
+        <div class="sib-val">3%</div>
+        <div class="sib-lbl">Vale del total</div>
+      </div>
+    </div>
+
+    <div class="name-row">
+      <input class="name-inp" type="text" id="player-name"
+             placeholder="✏️ Escribe tu nombre completo..." maxlength="40"/>
+      <button class="btn btn-indigo btn-lg" onclick="startActivity()">
+        Iniciar ➜
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 1 — CLASSIFY DEVICES
+════════════════════════════════════════ -->
+<div class="screen" id="s-stage1">
+  <div class="hud">
+    <span class="hud-name" id="hud1-name">👤</span>
+    <span class="hud-score">⭐ <span id="hud1-pts">0.0</span> / 10</span>
+    <span class="hud-stage">Actividad 1 de 3</span>
+  </div>
+  <div class="pbar-wrap"><div class="pbar-fill" id="pbar1" style="width:0%"></div></div>
+
+  <div class="sec-card">
+    <div class="sec-eyebrow">⚙️ Actividad 1 — Hardware</div>
+    <div class="sec-title">Clasifica los dispositivos</div>
+    <div class="sec-desc">Haz clic en cada dispositivo y luego en la categoría donde pertenece.
+    ¡Recuerda que los dispositivos mixtos son de entrada Y salida a la vez!</div>
+  </div>
+
+  <div class="sec-card">
+    <div class="concept-banner">
+      💡 <strong>Dispositivo mixto (entrada + salida):</strong> Es aquel que puede enviar información
+      A la computadora y también recibir información DE ella. Ejemplo: una impresora multifuncional
+      escanea (entrada) e imprime (salida). Una pantalla interactiva muestra imagen (salida) y
+      registra toques (entrada).
+    </div>
+
+    <p style="font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:12px;">
+      👇 Selecciona un dispositivo y luego haz clic en su categoría:
+    </p>
+    <div class="classify-pool" id="cl-pool"></div>
+
+    <div class="classify-zones">
+      <div class="cl-zone hw-zone" id="zone-mixto" onclick="dropToZone('mixto')">
+        <div class="cl-zone-title">
+          <div class="cl-zone-icon zi-hw">🔄</div>
+          Mixto (Entrada + Salida)
+        </div>
+        <div class="cl-dropped" id="dropped-mixto"></div>
+      </div>
+      <div class="cl-zone sw-zone" id="zone-puro" onclick="dropToZone('puro')">
+        <div class="cl-zone-title">
+          <div class="cl-zone-icon zi-sw">➡️</div>
+          Solo Entrada o Solo Salida
+        </div>
+        <div class="cl-dropped" id="dropped-puro"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;flex-wrap:wrap;gap:10px">
+      <button class="btn btn-amber" onclick="checkClassify()">✅ Verificar clasificación</button>
+      <span id="cl-feedback" style="font-weight:700;font-size:.9rem;color:var(--muted)"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 2 — QUIZ
+════════════════════════════════════════ -->
+<div class="screen" id="s-stage2">
+  <div class="hud">
+    <span class="hud-name" id="hud2-name">👤</span>
+    <span class="hud-score">⭐ <span id="hud2-pts">0.0</span> / 10</span>
+    <span class="hud-stage">Actividad 2 de 3</span>
+  </div>
+  <div class="pbar-wrap"><div class="pbar-fill" id="pbar2" style="width:0%"></div></div>
+
+  <div class="sec-card">
+    <div class="sec-eyebrow">💾 Actividad 2 — Software</div>
+    <div class="sec-title">Preguntas de opción múltiple</div>
+    <div class="sec-desc">Responde sobre software de ofimática y archivos digitales escolares. Cada pregunta correcta suma puntos.</div>
+  </div>
+
+  <div class="q-progress" id="q-progress"></div>
+  <div id="quiz-area"></div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 3 — MATCH PAIRS
+════════════════════════════════════════ -->
+<div class="screen" id="s-stage3">
+  <div class="hud">
+    <span class="hud-name" id="hud3-name">👤</span>
+    <span class="hud-score">⭐ <span id="hud3-pts">0.0</span> / 10</span>
+    <span class="hud-stage">Actividad 3 de 3</span>
+  </div>
+  <div class="pbar-wrap"><div class="pbar-fill" id="pbar3" style="width:0%"></div></div>
+
+  <div class="sec-card">
+    <div class="sec-eyebrow">🔗 Actividad 3 — Repaso general</div>
+    <div class="sec-title">Une cada elemento con su descripción</div>
+    <div class="sec-desc">Haz clic en un elemento de la columna izquierda y luego en su descripción correcta en la derecha.</div>
+  </div>
+
+  <div class="sec-card">
+    <div class="match-grid">
+      <div>
+        <div class="match-col-title">📌 Elemento</div>
+        <div id="match-left"></div>
+      </div>
+      <div>
+        <div class="match-col-title">📝 Descripción</div>
+        <div id="match-right"></div>
+      </div>
+    </div>
+    <div class="match-status" id="match-status"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:18px">
+      <button class="btn btn-indigo" id="match-next-btn" onclick="goToFinal()" style="display:none">
+        Ver resultados finales ➜
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 4 — FINAL RESULTS
+════════════════════════════════════════ -->
+<div class="screen" id="s-final">
+  <div class="result-card">
+    <span class="result-emoji" id="r-emoji">🏆</span>
+    <div class="result-title" id="r-title">¡Actividad completada!</div>
+    <p class="result-sub" id="r-sub">Aquí están tus resultados:</p>
+
+    <div class="score-card-wrap">
+      <div class="score-card">
+        <div class="score-card-val" id="r-score-num">0<span class="score-card-den">/10</span></div>
+        <div class="score-card-lbl">PUNTUACIÓN FINAL</div>
+      </div>
+      <div class="pct-card">
+        <div class="pct-val" id="r-pct">0%</div>
+        <div class="pct-lbl">PORCENTAJE (del 3%)</div>
+      </div>
+    </div>
+
+    <div class="breakdown" id="r-breakdown"></div>
+
+    <div class="indicator-box">
+      <div class="ib-title">📋 Indicadores de logro evaluados:</div>
+      <div class="ib-body">
+        • Identificar dispositivos de <strong>hardware</strong> de entrada y salida mixtos como la impresora multifuncional y las pantallas interactivas.<br>
+        • Identificar la funcionalidad y propósito de los diferentes <strong>softwares</strong> de ofimática, reconociendo su utilidad en archivos digitales escolares.
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="restartAll()">🔄 Intentar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+/* ================================================
+   STATE
+================================================ */
+let playerName   = '';
+let rawScore     = 0;   // 0–10 raw
+let stage1Points = 0;
+let stage2Points = 0;
+let stage3Points = 0;
+const MAX_SCORE  = 10;
+const PCT_WEIGHT = 3;   // worth 3% of total grade
+
+/* ================================================
+   CLASSIFY DATA  (Stage 1)
+   4 pts total: each correct = 0.5 pt
+================================================ */
+const CL_ITEMS = [
+  { id:'impresora-mf',  label:'🖨️ Impresora multifuncional', cat:'mixto'  },
+  { id:'pantalla-int',  label:'📺 Pantalla interactiva',      cat:'mixto'  },
+  { id:'tableta-graf',  label:'🖊️ Tableta gráfica',           cat:'mixto'  },
+  { id:'camara-doc',    label:'📷 Cámara de documentos',      cat:'mixto'  },
+  { id:'teclado',       label:'⌨️ Teclado',                    cat:'puro'   },
+  { id:'altavoces',     label:'🔊 Altavoces',                  cat:'puro'   },
+  { id:'proyector',     label:'📽️ Proyector',                  cat:'puro'   },
+  { id:'scanner',       label:'🔍 Escáner de documentos',     cat:'puro'   },
+];
+const CL_POINTS = 4;   // total for this stage
+const CL_PER    = CL_POINTS / CL_ITEMS.length;  // 0.5 per item
+
+let clSelected  = null;
+let clPlaced    = {};   // id -> zone
+let clChecked   = false;
+
+/* ================================================
+   QUIZ DATA  (Stage 2)  — 4 pts total
+   Each correct = 4/6 ≈ 0.667 pt → round at end
+================================================ */
+const QUIZ = [
+  {
+    tag:'tag-sw', label:'Software',
+    text:'¿Cuál de los siguientes es un software de ofimática?',
+    opts:['Google Chrome 🌐','Microsoft Word 📝','Minecraft 🎮','Spotify 🎵'],
+    correct:1,
+    explain:'Microsoft Word es un procesador de texto, parte de la suite de ofimática Office.'
+  },
+  {
+    tag:'tag-hw', label:'Hardware',
+    text:'Una impresora multifuncional es un dispositivo mixto porque…',
+    opts:[
+      'Solo imprime documentos 🖨️',
+      'Escanea (entrada) e imprime (salida) información 🔄',
+      'Es inalámbrica 📡',
+      'Funciona solo con USB 🔌'
+    ],
+    correct:1,
+    explain:'Al escanear recibe datos (entrada) y al imprimir los envía en papel (salida).'
+  },
+  {
+    tag:'tag-sw', label:'Software',
+    text:'¿Qué extensión de archivo corresponde a una presentación de PowerPoint?',
+    emoji:'📊',
+    opts:['.docx 📝','.xlsx 📊','.pptx 📊','.pdf 📄'],
+    correct:2,
+    explain:'Los archivos .pptx son presentaciones creadas con Microsoft PowerPoint.'
+  },
+  {
+    tag:'tag-sw', label:'Software',
+    text:'¿Cuál software usarías para crear una hoja de cálculo con calificaciones?',
+    opts:['Microsoft Excel 📊','Microsoft Word 📝','Paint 🎨','Notepad 🗒️'],
+    correct:0,
+    explain:'Excel es el software de ofimática especializado en hojas de cálculo y datos.'
+  },
+  {
+    tag:'tag-hw', label:'Hardware',
+    text:'¿Cuál de estos dispositivos permite TANTO recibir órdenes del usuario COMO mostrar información?',
+    emoji:'📺',
+    opts:['Micrófono 🎙️','Pantalla táctil interactiva 📺','Impresora 🖨️ solo de texto','Disco duro externo 💾'],
+    correct:1,
+    explain:'La pantalla táctil interactiva detecta toques (entrada) y muestra contenido (salida).'
+  },
+  {
+    tag:'tag-sw', label:'Software',
+    text:'¿Cuál es la función principal del software de ofimática en la escuela?',
+    opts:[
+      'Jugar en línea 🎮',
+      'Crear, editar y organizar documentos digitales escolares 📂',
+      'Descargar canciones 🎵',
+      'Hackear sistemas 💻'
+    ],
+    correct:1,
+    explain:'La ofimática permite crear documentos, presentaciones y hojas de cálculo para tareas escolares.'
+  },
+];
+const QUIZ_POINTS   = 4;
+const QUIZ_PER      = QUIZ_POINTS / QUIZ.length;
+
+let qCurrent  = 0;
+let qAnswered = false;
+
+/* ================================================
+   MATCH DATA  (Stage 3)  — 2 pts total
+   5 pairs → 0.4 pt each
+================================================ */
+const MATCH_PAIRS = [
+  { left:'📝 Archivo .docx',           right:'Creado con Microsoft Word (procesador de texto)' },
+  { left:'🖨️ Impresora multifuncional', right:'Dispositivo mixto: escanea e imprime documentos' },
+  { left:'📊 Hoja de cálculo',          right:'Documento de Excel con datos organizados en celdas' },
+  { left:'📺 Pantalla interactiva',     right:'Hardware de entrada y salida: toca y muestra imágenes' },
+  { left:'📂 Software de ofimática',    right:'Conjunto de programas para crear documentos escolares' },
+];
+const MATCH_POINTS = 2;
+const MATCH_PER    = MATCH_POINTS / MATCH_PAIRS.length;
+
+let matchLeftSel  = null;
+let matchMatched  = new Set();
+let matchCorrect  = 0;
+
+/* ================================================
+   SHOW / HIDE SCREENS
+================================================ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================================================
+   HUD + PROGRESS BAR
+================================================ */
+function updateHUD(bar, pts) {
+  document.querySelectorAll(`[id^="hud"]`).forEach(el => {
+    if (el.id.includes('name')) el.textContent = '👤 ' + playerName;
+    if (el.id.includes('pts'))  el.textContent = rawScore.toFixed(1);
+  });
+  if (bar) {
+    const pct = (rawScore / MAX_SCORE) * 100;
+    document.getElementById(bar).style.width = pct + '%';
+  }
+}
+
+/* ================================================
+   START
+================================================ */
+function startActivity() {
+  const v = document.getElementById('player-name').value.trim();
+  playerName = v || 'Estudiante';
+  rawScore = 0; stage1Points = 0; stage2Points = 0; stage3Points = 0;
+  clPlaced = {}; clSelected = null; clChecked = false;
+  matchMatched = new Set(); matchLeftSel = null; matchCorrect = 0;
+  qCurrent = 0; qAnswered = false;
+  buildClassify();
+  showScreen('s-stage1');
+  updateHUD('pbar1');
+}
+
+/* ================================================
+   STAGE 1 — CLASSIFY
+================================================ */
+function buildClassify() {
+  const pool = document.getElementById('cl-pool');
+  pool.innerHTML = '';
+  document.getElementById('dropped-mixto').innerHTML = '';
+  document.getElementById('dropped-puro').innerHTML = '';
+  document.getElementById('cl-feedback').textContent = '';
+
+  const shuffled = [...CL_ITEMS].sort(() => Math.random() - .5);
+  shuffled.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'cl-item';
+    el.id = 'cli-' + item.id;
+    el.dataset.id = item.id;
+    el.textContent = item.label;
+    el.addEventListener('click', () => selectClItem(item.id, el));
+    pool.appendChild(el);
+  });
+}
+
+function selectClItem(id, el) {
+  if (clChecked) return;
+  // Deselect all
+  document.querySelectorAll('.cl-item').forEach(e => e.style.boxShadow = '');
+  if (clPlaced[id]) return; // already placed
+  clSelected = id;
+  el.style.boxShadow = '0 0 0 3px ' + 'var(--indigo2)';
+  document.getElementById('cl-feedback').textContent = '👆 Ahora haz clic en la categoría donde pertenece';
+}
+
+function dropToZone(zone) {
+  if (!clSelected || clChecked) return;
+  if (clPlaced[clSelected]) { clSelected = null; return; }
+  clPlaced[clSelected] = zone;
+
+  // Hide from pool
+  const poolEl = document.getElementById('cli-' + clSelected);
+  if (poolEl) poolEl.classList.add('placed');
+
+  // Add to zone
+  const item   = CL_ITEMS.find(i => i.id === clSelected);
+  const dropEl = document.getElementById('dropped-' + zone);
+  const chip   = document.createElement('div');
+  chip.className = 'cl-dropped-item pending';
+  chip.dataset.id = item.id;
+  chip.textContent = item.label;
+  chip.title = 'Clic para devolver';
+  chip.addEventListener('click', () => returnClItem(item.id));
+  dropEl.appendChild(chip);
+
+  clSelected = null;
+  document.querySelectorAll('.cl-item').forEach(e => e.style.boxShadow = '');
+  document.getElementById('cl-feedback').textContent = '✅ Colocado. Sigue con los demás.';
+}
+
+function returnClItem(id) {
+  if (clChecked) return;
+  const zone = clPlaced[id];
+  if (!zone) return;
+  const dropZone = document.getElementById('dropped-' + zone);
+  const chip = dropZone.querySelector(`[data-id="${id}"]`);
+  if (chip) chip.remove();
+  delete clPlaced[id];
+  const poolEl = document.getElementById('cli-' + id);
+  if (poolEl) poolEl.classList.remove('placed');
+}
+
+function checkClassify() {
+  if (clChecked) return;
+  const total = Object.keys(clPlaced).length;
+  if (total < CL_ITEMS.length) {
+    document.getElementById('cl-feedback').textContent =
+      `⚠️ Aún faltan ${CL_ITEMS.length - total} dispositivo(s) por clasificar.`;
+    return;
+  }
+  clChecked = true;
+  let correct = 0;
+  CL_ITEMS.forEach(item => {
+    const placed = clPlaced[item.id];
+    const zones  = ['mixto','puro'];
+    zones.forEach(z => {
+      const dz   = document.getElementById('dropped-' + z);
+      const chip = dz && dz.querySelector(`[data-id="${item.id}"]`);
+      if (!chip) return;
+      chip.classList.remove('pending');
+      if (placed === item.cat) { chip.classList.add('correct'); correct++; }
+      else                     { chip.classList.add('wrong'); }
+    });
+  });
+  const pts = +(correct * CL_PER).toFixed(2);
+  stage1Points = pts;
+  rawScore = Math.min(MAX_SCORE, rawScore + pts);
+  updateHUD('pbar1');
+  document.getElementById('cl-feedback').textContent =
+    `✅ ${correct}/${CL_ITEMS.length} correctos → +${pts.toFixed(1)} puntos`;
+
+  setTimeout(() => {
+    buildQuiz();
+    showScreen('s-stage2');
+    updateHUD('pbar2');
+  }, 2000);
+}
+
+/* ================================================
+   STAGE 2 — QUIZ
+================================================ */
+function buildQuiz() {
+  qCurrent = 0; qAnswered = false;
+  renderQProgress();
+  renderQuestion();
+}
+
+function renderQProgress() {
+  const el = document.getElementById('q-progress');
+  el.innerHTML = '';
+  QUIZ.forEach((_, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'qp-pip' +
+      (i < qCurrent ? ' done' : i === qCurrent ? ' current' : '');
+    el.appendChild(pip);
+  });
+}
+
+function renderQuestion() {
+  qAnswered = false;
+  const q   = QUIZ[qCurrent];
+  const area = document.getElementById('quiz-area');
+  let html = `
+    <div class="q-panel">
+      <span class="q-tag ${q.tag}">${q.label}</span>
+      <div class="q-num">Pregunta ${qCurrent+1} de ${QUIZ.length}</div>
+      <div class="q-text">${q.text}</div>
+  `;
+  if (q.emoji) html += `<div class="q-image-row"><div class="q-emoji-img">${q.emoji}</div></div>`;
+  html += `<div class="opts ${q.opts.length > 3 ? '' : 'single-col'}">`;
+  q.opts.forEach((opt, i) => {
+    html += `<button class="opt" onclick="answerQ(${i})">${opt}</button>`;
+  });
+  html += `</div><div class="q-feedback" id="q-fb"></div>`;
+  if (qCurrent < QUIZ.length - 1) {
+    html += `<div class="next-row"><button class="btn btn-teal" id="q-next-btn" style="display:none" onclick="nextQ()">Siguiente ➜</button></div>`;
+  }
+  html += `</div>`;
+  area.innerHTML = html;
+}
+
+function answerQ(idx) {
+  if (qAnswered) return;
+  qAnswered = true;
+  const q    = QUIZ[qCurrent];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(b => b.disabled = true);
+  const fb = document.getElementById('q-fb');
+
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    const pts = +QUIZ_PER.toFixed(3);
+    stage2Points += pts;
+    rawScore = Math.min(MAX_SCORE, rawScore + pts);
+    updateHUD('pbar2');
+    fb.className = 'q-feedback ok show';
+    fb.textContent = `✅ ¡Correcto! ${q.explain}`;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[q.correct].classList.add('correct');
+    fb.className = 'q-feedback bad show';
+    fb.textContent = `❌ Incorrecto. ${q.explain}`;
+  }
+
+  const nextBtn = document.getElementById('q-next-btn');
+  if (nextBtn) nextBtn.style.display = 'inline-flex';
+  else setTimeout(nextQ, 1800);
+}
+
+function nextQ() {
+  qCurrent++;
+  if (qCurrent >= QUIZ.length) {
+    // Round stage2 points neatly
+    stage2Points = +stage2Points.toFixed(2);
+    buildMatch();
+    showScreen('s-stage3');
+    updateHUD('pbar3');
+  } else {
+    renderQProgress();
+    renderQuestion();
+  }
+}
+
+/* ================================================
+   STAGE 3 — MATCH
+================================================ */
+function buildMatch() {
+  matchMatched = new Set();
+  matchLeftSel = null;
+  matchCorrect = 0;
+  document.getElementById('match-status').className  = 'match-status';
+  document.getElementById('match-status').textContent = '';
+  document.getElementById('match-next-btn').style.display = 'none';
+
+  const shuffledRight = [...MATCH_PAIRS].sort(() => Math.random() - .5);
+
+  const leftEl  = document.getElementById('match-left');
+  const rightEl = document.getElementById('match-right');
+  leftEl.innerHTML = '';
+  rightEl.innerHTML = '';
+
+  MATCH_PAIRS.forEach((pair, i) => {
+    const lEl = document.createElement('div');
+    lEl.className = 'match-item';
+    lEl.dataset.idx = i;
+    lEl.textContent = pair.left;
+    lEl.addEventListener('click', () => selectLeft(i, lEl));
+    leftEl.appendChild(lEl);
+  });
+
+  shuffledRight.forEach(pair => {
+    const origIdx = MATCH_PAIRS.findIndex(p => p.right === pair.right);
+    const rEl = document.createElement('div');
+    rEl.className = 'match-item';
+    rEl.dataset.idx = origIdx;
+    rEl.textContent = pair.right;
+    rEl.addEventListener('click', () => selectRight(origIdx, rEl));
+    rightEl.appendChild(rEl);
+  });
+}
+
+function selectLeft(idx, el) {
+  if (matchMatched.has(idx)) return;
+  document.querySelectorAll('#match-left .match-item').forEach(e => e.classList.remove('selected'));
+  matchLeftSel = idx;
+  el.classList.add('selected');
+}
+
+function selectRight(idx, el) {
+  if (matchLeftSel === null) {
+    document.getElementById('match-status').className = 'match-status show bad';
+    document.getElementById('match-status').textContent = '⚠️ Primero selecciona un elemento de la izquierda.';
+    return;
+  }
+  if (matchMatched.has(matchLeftSel)) { matchLeftSel = null; return; }
+
+  const statusEl = document.getElementById('match-status');
+
+  if (matchLeftSel === idx) {
+    // Correct
+    matchMatched.add(idx);
+    matchCorrect++;
+    // Mark left
+    const lEl = document.querySelector(`#match-left .match-item[data-idx="${idx}"]`);
+    if (lEl) { lEl.classList.remove('selected'); lEl.classList.add('matched-ok'); }
+    // Mark right
+    el.classList.add('matched-ok');
+
+    const pts = +MATCH_PER.toFixed(3);
+    stage3Points += pts;
+    rawScore = Math.min(MAX_SCORE, rawScore + pts);
+    updateHUD('pbar3');
+
+    statusEl.className = 'match-status show ok';
+    statusEl.textContent = `✅ ¡Correcto! (${matchMatched.size}/${MATCH_PAIRS.length})`;
+
+    if (matchMatched.size === MATCH_PAIRS.length) {
+      statusEl.textContent = '🏆 ¡Emparejaste todo correctamente!';
+      document.getElementById('match-next-btn').style.display = 'inline-flex';
+    }
+  } else {
+    // Wrong
+    el.classList.add('matched-err');
+    statusEl.className = 'match-status show bad';
+    statusEl.textContent = '❌ Esa combinación no es correcta. ¡Inténtalo de nuevo!';
+    setTimeout(() => el.classList.remove('matched-err'), 800);
+  }
+  matchLeftSel = null;
+  document.querySelectorAll('#match-left .match-item').forEach(e => e.classList.remove('selected'));
+}
+
+/* ================================================
+   FINAL RESULTS
+================================================ */
+function goToFinal() {
+  // Clamp and finalize
+  rawScore = Math.min(MAX_SCORE, rawScore);
+  const displayScore = +rawScore.toFixed(1);
+  const pctOfThree   = +((rawScore / MAX_SCORE) * PCT_WEIGHT).toFixed(2);
+
+  // Emoji + message based on score
+  let emoji, title, sub;
+  const pct = rawScore / MAX_SCORE;
+  if (pct >= .9)      { emoji='🥇'; title='¡Excelente trabajo!';    sub='Dominaste los indicadores de logro. ¡Sobresaliente! 🎉'; }
+  else if (pct >= .7) { emoji='🏆'; title='¡Muy bien!';             sub='Tienes buen dominio de los temas. ¡Sigue así! 💪'; }
+  else if (pct >= .5) { emoji='📚'; title='¡Buen esfuerzo!';        sub='Puedes mejorar repasando los conceptos clave. 🌟'; }
+  else                { emoji='🌱'; title='¡Sigue practicando!';    sub='Te recomendamos repasar hardware y ofimática. ¡Tú puedes! 💡'; }
+
+  document.getElementById('r-emoji').textContent    = emoji;
+  document.getElementById('r-title').textContent    = title;
+  document.getElementById('r-sub').textContent      = sub;
+  document.getElementById('r-score-num').innerHTML  =
+    `${displayScore}<span class="score-card-den">/10</span>`;
+  document.getElementById('r-pct').textContent = pctOfThree + '%';
+
+  // Breakdown
+  const bd = document.getElementById('r-breakdown');
+  bd.innerHTML = `
+    <table>
+      <tr>
+        <th>Actividad</th><th>Tema</th><th>Aciertos</th><th>Puntos</th>
+      </tr>
+      <tr>
+        <td>1 – Clasifica dispositivos</td>
+        <td>Hardware mixto</td>
+        <td>${Math.round(stage1Points / CL_PER)}/${CL_ITEMS.length}</td>
+        <td><span class="badge-pts">${stage1Points.toFixed(1)} / ${CL_POINTS}</span></td>
+      </tr>
+      <tr>
+        <td>2 – Opción múltiple</td>
+        <td>Software ofimática</td>
+        <td>${Math.round(stage2Points / QUIZ_PER)}/${QUIZ.length}</td>
+        <td><span class="badge-pts">${stage2Points.toFixed(1)} / ${QUIZ_POINTS}</span></td>
+      </tr>
+      <tr>
+        <td>3 – Une los pares</td>
+        <td>Repaso general</td>
+        <td>${matchCorrect}/${MATCH_PAIRS.length}</td>
+        <td><span class="badge-pts">${stage3Points.toFixed(1)} / ${MATCH_POINTS}</span></td>
+      </tr>
+      <tr style="font-weight:800;background:var(--surface2)">
+        <td colspan="2"><strong>TOTAL</strong></td>
+        <td>—</td>
+        <td><span class="badge-pts" style="background:var(--indigo2);color:#fff">
+          ${displayScore} / 10 → ${pctOfThree}%
+        </span></td>
+      </tr>
+    </table>
+  `;
+
+  if (pct >= .7) launchConfetti();
+  showScreen('s-final');
+}
+
+/* ================================================
+   RESTART
+================================================ */
+function restartAll() {
+  rawScore = 0; stage1Points = 0; stage2Points = 0; stage3Points = 0;
+  clPlaced = {}; clSelected = null; clChecked = false;
+  matchMatched = new Set(); matchLeftSel = null; matchCorrect = 0;
+  qCurrent = 0; qAnswered = false;
+  document.getElementById('player-name').value = '';
+  showScreen('s-welcome');
+}
+
+/* ================================================
+   CONFETTI
+================================================ */
+function launchConfetti() {
+  const cols = ['#4F46E5','#14B8A6','#F59E0B','#10B981','#F43F5E','#8B5CF6','#06B6D4'];
+  for (let i = 0; i < 55; i++) {
+    const p = document.createElement('div');
+    p.className = 'cpiece';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = cols[Math.floor(Math.random() * cols.length)];
+    p.style.width  = (8 + Math.random() * 8) + 'px';
+    p.style.height = (10 + Math.random() * 12) + 'px';
+    p.style.borderRadius = Math.random() > .5 ? '50%' : '3px';
+    p.style.animationDelay    = (Math.random() * 1.5) + 's';
+    p.style.animationDuration = (1.4 + Math.random() * 1.3) + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 4500);
+  }
+}
+
+/* Enter key to start */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('player-name')
+    .addEventListener('keydown', e => { if (e.key === 'Enter') startActivity(); });
+});
+</script>
+</body>
+</html>
