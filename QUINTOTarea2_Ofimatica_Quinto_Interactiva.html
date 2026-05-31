@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarea N°2 - Ofimática y Sistema Operativo | Formación Tecnológica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#dcfce7; --bg2:#dbeafe; --bg3:#fef9c3;
+    --ink:#1e293b; --muted:#64748b;
+    --card:#ffffff; --line:#e2e8f0;
+    --primary:#0d9488; --primary-d:#0f766e;
+    --accent:#0ea5e9; --good:#16a34a; --bad:#dc2626; --warn:#f59e0b;
+    --display:'Fredoka','Trebuchet MS','Segoe UI',system-ui,sans-serif;
+    --body:'Nunito','Trebuchet MS','Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--body);color:var(--ink);
+    background:
+      radial-gradient(1100px 600px at 8% -10%, var(--bg1), transparent 60%),
+      radial-gradient(900px 600px at 100% 0%, var(--bg3), transparent 55%),
+      linear-gradient(160deg, var(--bg2), #f8fafc 70%);
+    min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:24px 16px 80px;}
+
+  .hero{
+    background:linear-gradient(135deg, var(--primary), #14b8a6 55%, var(--accent));
+    color:#fff;border-radius:24px;padding:26px 26px 24px;
+    box-shadow:0 18px 40px -18px rgba(13,148,136,.6);position:relative;overflow:hidden;
+  }
+  .hero::after{content:"";position:absolute;inset:0;opacity:.18;
+    background-image:radial-gradient(#fff 1.4px, transparent 1.6px);background-size:18px 18px;}
+  .hero h1{font-family:var(--display);font-weight:700;margin:0 0 4px;font-size:clamp(22px,4.4vw,31px);letter-spacing:.3px;position:relative;}
+  .hero .sub{margin:0;opacity:.95;font-weight:600;position:relative;}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;position:relative;}
+  .badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+    backdrop-filter:blur(4px);padding:6px 12px;border-radius:999px;font-weight:700;font-size:13px;}
+  .name-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;position:relative;}
+  .name-row input{flex:1 1 200px;border:none;border-radius:12px;padding:10px 14px;
+    font-family:var(--body);font-size:15px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.92);outline:none;}
+  .name-row input::placeholder{color:#94a3b8;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:22px;margin-top:20px;box-shadow:0 10px 30px -22px rgba(30,41,59,.5);}
+  .step{display:flex;align-items:center;gap:10px;margin:0 0 4px;}
+  .chip{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+    background:var(--primary);color:#fff;font-family:var(--display);font-weight:700;font-size:18px;
+    box-shadow:0 6px 14px -6px var(--primary);flex:0 0 auto;}
+  .card h2{font-family:var(--display);font-weight:600;margin:0;font-size:19px;}
+  .pts-tag{margin-left:auto;background:#ccfbf1;color:var(--primary-d);font-weight:800;
+    padding:4px 12px;border-radius:999px;font-size:13px;border:1px solid #99f6e4;white-space:nowrap;}
+  .desc{color:var(--muted);font-weight:600;margin:8px 0 16px;font-size:14.5px;}
+
+  /* Inputs programas */
+  .inputs3{display:grid;grid-template-columns:1fr;gap:12px;}
+  .field{position:relative;}
+  .field label{font-weight:800;color:#475569;font-size:13px;display:block;margin-bottom:5px;}
+  .field input{width:100%;font-family:var(--body);font-weight:700;font-size:15px;color:var(--ink);
+    padding:11px 14px;border-radius:12px;border:2px solid var(--line);background:#fff;outline:none;transition:.2s;}
+  .field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.15);}
+  .field.right input{border-color:var(--good);background:#f0fdf4;}
+  .field.wrong input{border-color:var(--bad);background:#fef2f2;}
+  .mark{position:absolute;right:12px;top:34px;font-weight:900;font-size:16px;display:none;}
+  .field.right .mark{display:block;color:var(--good);}
+  .field.wrong .mark{display:block;color:var(--bad);}
+
+  /* Casos (dropdown) */
+  .q{padding:14px 0;border-bottom:1px dashed var(--line);}
+  .q:last-child{border-bottom:none;}
+  .q .num{font-weight:800;color:var(--primary);margin-right:4px;}
+  .q p{margin:0 0 10px;font-weight:700;font-size:15.5px;}
+  .q select{width:100%;font-family:var(--body);font-weight:700;font-size:15px;color:var(--ink);
+    padding:11px 14px;border-radius:12px;border:2px solid var(--line);background:#fff;outline:none;cursor:pointer;transition:.2s;}
+  .q select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.15);}
+  .q.right select{border-color:var(--good);background:#f0fdf4;}
+  .q.wrong select{border-color:var(--bad);background:#fef2f2;}
+  .feedback{font-size:13.5px;font-weight:700;margin-top:8px;display:none;}
+  .q.right .feedback{display:block;color:var(--good);}
+  .q.wrong .feedback{display:block;color:var(--bad);}
+
+  /* Iconos barra de tareas */
+  .icons-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  @media (max-width:520px){.icons-grid{grid-template-columns:1fr;}}
+  .icon-card{border:2px solid var(--line);border-radius:16px;padding:14px;text-align:center;background:#fafdff;transition:.2s;}
+  .icon-card.right{border-color:var(--good);background:#f0fdf4;}
+  .icon-card.wrong{border-color:var(--bad);background:#fef2f2;}
+  .icon-card svg{width:56px;height:56px;color:var(--primary-d);}
+  .icon-card select{width:100%;margin-top:10px;font-family:var(--body);font-weight:700;font-size:14.5px;color:var(--ink);
+    padding:9px 10px;border-radius:10px;border:2px solid var(--line);background:#fff;outline:none;cursor:pointer;}
+  .icon-card .fb{font-size:12.5px;font-weight:800;margin-top:7px;display:none;}
+  .icon-card.right .fb{display:block;color:var(--good);}
+  .icon-card.wrong .fb{display:block;color:var(--bad);}
+
+  /* Acciones */
+  .actions{text-align:center;margin-top:26px;}
+  .warn-note{color:var(--warn);font-weight:800;font-size:13.5px;margin-bottom:12px;}
+  .btn{font-family:var(--display);font-weight:600;font-size:18px;border:none;cursor:pointer;
+    padding:15px 34px;border-radius:14px;color:#fff;background:linear-gradient(135deg,var(--primary),#14b8a6);
+    box-shadow:0 12px 26px -12px var(--primary);transition:.2s;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn:active{transform:translateY(0);}
+  .btn:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed;transform:none;}
+
+  /* Resultados */
+  .results{display:none;margin-top:22px;}
+  .results.show{display:block;animation:pop .4s ease;}
+  @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:none;}}
+  .score-hero{text-align:center;border-radius:20px;padding:26px 20px;color:#fff;
+    background:linear-gradient(135deg,#0ea5e9,#0d9488);position:relative;overflow:hidden;}
+  .score-hero .emoji{font-size:46px;line-height:1;}
+  .score-hero h3{font-family:var(--display);font-weight:700;font-size:24px;margin:8px 0 2px;}
+  .score-hero p{margin:0;font-weight:700;opacity:.95;}
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;}
+  .metric{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 10px;text-align:center;
+    box-shadow:0 8px 20px -16px rgba(30,41,59,.5);}
+  .metric .big{font-family:var(--display);font-weight:700;font-size:30px;color:var(--primary-d);line-height:1;}
+  .metric .lbl{font-weight:800;color:var(--muted);font-size:12px;margin-top:6px;text-transform:uppercase;letter-spacing:.5px;}
+  .breakdown{margin-top:14px;background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+  .breakdown .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700;padding:7px 0;font-size:14px;}
+  .breakdown .row + .row{border-top:1px dashed var(--line);}
+  .breakdown .row b{color:var(--primary-d);white-space:nowrap;}
+  @media (max-width:420px){.metrics{grid-template-columns:1fr;}}
+
+  .foot{text-align:center;color:var(--muted);font-weight:600;font-size:12.5px;margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>💻 Ofimática y Sistema Operativo</h1>
+    <p class="sub">Tarea N°2 · Formación Tecnológica · Nivel: Quinto Año</p>
+    <div class="badges">
+      <span class="badge">📋 Total: 12 puntos</span>
+      <span class="badge">🎯 Valor: 3%</span>
+      <span class="badge">⚠️ Una sola vez</span>
+    </div>
+    <div class="name-row">
+      <input id="studentName" type="text" placeholder="✍️ Escribí tu nombre completo">
+    </div>
+  </header>
+
+  <!-- ACTIVIDAD 1 -->
+  <section class="card">
+    <div class="step">
+      <span class="chip">1</span>
+      <h2>Escribí 3 programas de ofimática</h2>
+      <span class="pts-tag">4 pts</span>
+    </div>
+    <p class="desc">Anotá el nombre de <b>3 programas de ofimática</b> distintos en los espacios.</p>
+    <div class="inputs3">
+      <div class="field" id="p-0"><label>Programa 1</label><input id="prog-0" type="text" autocomplete="off" placeholder="Escribí aquí..."><span class="mark"></span></div>
+      <div class="field" id="p-1"><label>Programa 2</label><input id="prog-1" type="text" autocomplete="off" placeholder="Escribí aquí..."><span class="mark"></span></div>
+      <div class="field" id="p-2"><label>Programa 3</label><input id="prog-2" type="text" autocomplete="off" placeholder="Escribí aquí..."><span class="mark"></span></div>
+    </div>
+  </section>
+
+  <!-- ACTIVIDAD 2 -->
+  <section class="card">
+    <div class="step">
+      <span class="chip">2</span>
+      <h2>¿Qué software usarías?</h2>
+      <span class="pts-tag">4 pts</span>
+    </div>
+    <p class="desc">Elegí el software de ofimática correcto para cada caso (<b>Microsoft Word, Microsoft Excel o Microsoft PowerPoint</b>).</p>
+    <div id="cases"></div>
+  </section>
+
+  <!-- ACTIVIDAD 3 -->
+  <section class="card">
+    <div class="step">
+      <span class="chip">3</span>
+      <h2>Elementos de la barra de tareas</h2>
+      <span class="pts-tag">4 pts</span>
+    </div>
+    <p class="desc">Identificá el nombre de cada uno de los <b>4 elementos</b> que aparecen en la barra de tareas.</p>
+    <div class="icons-grid" id="icons"></div>
+  </section>
+
+  <div class="actions">
+    <p class="warn-note">⚠️ Esta tarea es evaluada: solo podés calificar UNA vez.</p>
+    <button class="btn" id="checkBtn">✅ Calificar mi tarea</button>
+  </div>
+
+  <!-- RESULTADOS -->
+  <section class="results" id="results">
+    <div class="score-hero">
+      <div class="emoji" id="resEmoji">🎉</div>
+      <h3 id="resTitle">¡Tarea calificada!</h3>
+      <p id="resName"></p>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="big"><span id="mPts">0</span>/12</div><div class="lbl">Puntos obtenidos</div></div>
+      <div class="metric"><div class="big" id="mNota">0</div><div class="lbl">Nota / 100</div></div>
+      <div class="metric"><div class="big"><span id="mPct">0</span>%</div><div class="lbl">de 3%</div></div>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+  </section>
+
+  <p class="foot">Documento interactivo evaluado · Formación Tecnológica · Primer Semestre 2026</p>
+</div>
+
+<script>
+/* =====================================================
+   DATOS
+===================================================== */
+const CASES = [
+  {text:"Óscar necesita digitar una carta para optar por un trabajo.", answer:"Microsoft Word"},
+  {text:"Cristina debe realizar una presentación o exposición sobre valores.", answer:"Microsoft PowerPoint"},
+  {text:"La profesora de Ciencias debe organizar las notas del examen de sus estudiantes y crear un gráfico con esa información.", answer:"Microsoft Excel"},
+];
+const CASE_OPTS = ["Microsoft Word","Microsoft Excel","Microsoft PowerPoint"];
+
+const ICONS = [
+  {svg:`<svg viewBox="0 0 64 64" fill="none"><rect x="6" y="20" width="44" height="24" rx="5" stroke="currentColor" stroke-width="4"/><rect x="52" y="27" width="6" height="10" rx="2" fill="currentColor"/><rect x="11" y="25" width="30" height="14" rx="2" fill="currentColor"/></svg>`, answer:"Batería"},
+  {svg:`<svg viewBox="0 0 64 64" fill="none"><rect x="8" y="12" width="48" height="40" rx="8" stroke="currentColor" stroke-width="4"/><line x1="16" y1="24" x2="48" y2="24" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="5" fill="currentColor"/><line x1="16" y1="40" x2="48" y2="40" stroke="currentColor" stroke-width="3"/><circle cx="40" cy="40" r="5" fill="currentColor"/></svg>`, answer:"Control de audio"},
+  {svg:`<svg viewBox="0 0 64 64" fill="none"><path d="M14 38 V32 a18 18 0 0 1 36 0 V38" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><rect x="9" y="36" width="11" height="19" rx="4" fill="currentColor"/><rect x="44" y="36" width="11" height="19" rx="4" fill="currentColor"/></svg>`, answer:"Auriculares"},
+  {svg:`<svg viewBox="0 0 64 64" fill="none"><path d="M10 26 H20 L32 16 V48 L20 38 H10 Z" fill="currentColor"/><path d="M40 24 a10 10 0 0 1 0 16" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M46 18 a18 18 0 0 1 0 28" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`, answer:"Sonido"},
+];
+const ICON_OPTS = ["Batería","Control de audio","Auriculares","Sonido"];
+
+/* =====================================================
+   RENDER
+===================================================== */
+const casesEl=document.getElementById('cases');
+CASES.forEach((c,i)=>{
+  const q=document.createElement('div'); q.className='q'; q.id='c-'+i;
+  q.innerHTML=`<p><span class="num">${i+1}.</span> ${c.text}</p>
+    <select id="csel-${i}"><option value="">— Elegí una opción —</option>${CASE_OPTS.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>
+    <div class="feedback" id="cfb-${i}"></div>`;
+  casesEl.appendChild(q);
+});
+
+const iconsEl=document.getElementById('icons');
+ICONS.forEach((ic,i)=>{
+  const d=document.createElement('div'); d.className='icon-card'; d.id='ic-'+i;
+  d.innerHTML=`${ic.svg}
+    <select id="isel-${i}"><option value="">— ¿Qué es? —</option>${ICON_OPTS.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>
+    <div class="fb" id="ifb-${i}"></div>`;
+  iconsEl.appendChild(d);
+});
+
+/* =====================================================
+   VALIDACIÓN PROGRAMAS DE OFIMÁTICA
+===================================================== */
+function normalize(s){
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ');
+}
+function canonProgram(s){
+  const n=normalize(s);
+  if(!n) return null;
+  if(n.includes('word')||n.includes('writer')||n.includes('documentos de google')||n==='docs'||n.includes('google docs')||n.includes('procesador de texto')||n.includes('wordpad')) return 'WORD';
+  if(n.includes('excel')||n.includes('hoja de calculo')||n.includes('hojas de calculo')||n.includes('sheets')||n==='calc'||n.includes('libreoffice calc')||n.includes('hoja electronica')) return 'EXCEL';
+  if(n.includes('power')||n.includes('presentacion')||n.includes('slides')||n.includes('impress')||n.includes('keynote')||n==='ppt') return 'POWERPOINT';
+  if(n.includes('access')||n.includes('base de datos')) return 'ACCESS';
+  if(n.includes('outlook')) return 'OUTLOOK';
+  if(n.includes('publisher')) return 'PUBLISHER';
+  if(n.includes('onenote')||n.includes('one note')) return 'ONENOTE';
+  return null;
+}
+
+/* =====================================================
+   RÚBRICA (3 indicadores, máx 4 c/u → 12)
+===================================================== */
+function rubric3(n){ if(n>=3)return 4; if(n===2)return 3; if(n===1)return 2; return 1; } // ind. 1 y 2 (0 → 1)
+function rubric4(n){ if(n>=4)return 4; if(n===3)return 3; if(n===2)return 2; return 1; } // ind. 3 (1 o 0 → 1)
+
+/* =====================================================
+   CALIFICAR (UNA SOLA VEZ)
+===================================================== */
+let graded=false;
+const results=document.getElementById('results');
+const checkBtn=document.getElementById('checkBtn');
+
+checkBtn.addEventListener('click',()=>{
+  if(graded) return;
+  if(!confirm("¿Estás seguro de calificar?\nEsta tarea es evaluada y solo se puede calificar UNA vez. Ya no podrás cambiar tus respuestas.")) return;
+  graded=true;
+
+  /* --- Indicador 1: programas --- */
+  const keys=[], seen=new Set();
+  for(let i=0;i<3;i++){
+    const k=canonProgram(document.getElementById('prog-'+i).value);
+    keys.push(k);
+  }
+  let validPrograms=0;
+  for(let i=0;i<3;i++){
+    const field=document.getElementById('p-'+i);
+    const mark=field.querySelector('.mark');
+    const k=keys[i];
+    if(k && !seen.has(k)){ seen.add(k); validPrograms++; field.classList.add('right'); mark.textContent='✓'; }
+    else{ field.classList.add('wrong'); mark.textContent='✗'; }
+  }
+  const pts1=rubric3(validPrograms);
+
+  /* --- Indicador 2: casos --- */
+  let correctCases=0;
+  CASES.forEach((c,i)=>{
+    const sel=document.getElementById('csel-'+i);
+    const q=document.getElementById('c-'+i);
+    const fb=document.getElementById('cfb-'+i);
+    if(sel.value===c.answer){ correctCases++; q.classList.add('right'); fb.textContent='✓ ¡Correcto!'; }
+    else{ q.classList.add('wrong'); fb.textContent= sel.value ? `✗ Correcto: ${c.answer}` : `✗ Sin responder. Era: ${c.answer}`; }
+  });
+  const pts2=rubric3(correctCases);
+
+  /* --- Indicador 3: barra de tareas --- */
+  let correctIcons=0;
+  ICONS.forEach((ic,i)=>{
+    const sel=document.getElementById('isel-'+i);
+    const card=document.getElementById('ic-'+i);
+    const fb=document.getElementById('ifb-'+i);
+    if(sel.value===ic.answer){ correctIcons++; card.classList.add('right'); fb.textContent='✓ Correcto'; }
+    else{ card.classList.add('wrong'); fb.textContent= sel.value ? `✗ Es: ${ic.answer}` : `✗ Era: ${ic.answer}`; }
+  });
+  const pts3=rubric4(correctIcons);
+
+  /* --- Totales --- */
+  const total=pts1+pts2+pts3;            // sobre 12
+  const nota=Math.round((total/12)*100); // base 100
+  const pct=((total/12)*3).toFixed(2);   // de 3%
+
+  document.getElementById('mPts').textContent=total;
+  document.getElementById('mNota').textContent=nota;
+  document.getElementById('mPct').textContent=pct;
+
+  const name=document.getElementById('studentName').value.trim();
+  document.getElementById('resName').textContent = name ? ('Estudiante: '+name) : 'Revisá tu desempeño abajo';
+
+  let emoji='💪', title='¡Tarea calificada!';
+  if(nota>=90){emoji='🏆';title='¡Excelente trabajo!';}
+  else if(nota>=75){emoji='🎉';title='¡Muy bien!';}
+  else if(nota>=60){emoji='👍';title='¡Buen esfuerzo!';}
+  document.getElementById('resEmoji').textContent=emoji;
+  document.getElementById('resTitle').textContent=title;
+
+  document.getElementById('breakdown').innerHTML=`
+    <div class="row"><span>🗂️ Programas de ofimática</span><b>${validPrograms}/3 → ${pts1} pts</b></div>
+    <div class="row"><span>🧩 Software según el caso</span><b>${correctCases}/3 → ${pts2} pts</b></div>
+    <div class="row"><span>📌 Elementos de la barra de tareas</span><b>${correctIcons}/4 → ${pts3} pts</b></div>
+    <div class="row"><span>⭐ Puntos totales</span><b>${total}/12</b></div>
+    <div class="row"><span>💯 Nota en base 100</span><b>${nota}</b></div>
+    <div class="row"><span>📊 Porcentaje obtenido</span><b>${pct}% de 3%</b></div>
+  `;
+
+  /* --- Bloquear todo (una sola vez) --- */
+  document.querySelectorAll('input, select').forEach(el=>{ el.disabled=true; });
+  checkBtn.disabled=true;
+  checkBtn.textContent='🔒 Tarea ya calificada';
+
+  results.classList.add('show');
+  results.scrollIntoView({behavior:'smooth',block:'start'});
+});
+</script>
+</body>
+</html>
