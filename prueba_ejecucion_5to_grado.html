@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Museo del Futuro · Prueba de Ejecución · Quinto Grado</title>
+<style>
+  :root{
+    --fondo1:#1a1242; --fondo2:#2b1a6b; --fondo3:#0e1b4d;
+    --neon:#5ed0ff; --neon2:#b98bff; --rosa:#ff8fcf;
+    --dorado:#ffd166; --verde:#3ddc84; --rojo:#ff6b7a;
+    --panel:#ffffff; --tinta:#1f2347; --suave:#6b6f97;
+    --azul:#1f57d6; --verdetxt:#1f9d4d; --naranja:#e8731a; --morado:#7b2fc4;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Verdana,sans-serif;
+    color:var(--tinta);
+    background:radial-gradient(1200px 800px at 80% -10%,#3a2a8a 0%,transparent 60%),
+               radial-gradient(900px 700px at 0% 110%,#10306e 0%,transparent 55%),
+               linear-gradient(160deg,var(--fondo1),var(--fondo2) 55%,var(--fondo3));
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .estrellas{position:fixed;inset:0;pointer-events:none;z-index:0;}
+  .estrellas i{position:absolute;background:#fff;border-radius:50%;opacity:.6;animation:twinkle 3s infinite ease-in-out;}
+  @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.7);}50%{opacity:.9;transform:scale(1.2);}}
+
+  .escena{position:relative;z-index:2;max-width:920px;margin:0 auto;padding:18px 16px 60px;}
+  .tarjeta{
+    background:var(--panel);border-radius:26px;padding:26px 26px 30px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45);position:relative;animation:subir .5s ease;
+  }
+  @keyframes subir{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+
+  /* Barra superior de progreso e info */
+  .barra{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;}
+  .etapaTag{background:linear-gradient(90deg,var(--neon2),var(--neon));color:#1a1242;font-weight:800;
+    padding:7px 16px;border-radius:999px;font-size:.95rem;letter-spacing:.3px;}
+  .progreso{flex:1;min-width:160px;height:14px;background:#e7e8f5;border-radius:999px;overflow:hidden;}
+  .progreso > span{display:block;height:100%;width:0;border-radius:999px;
+    background:linear-gradient(90deg,var(--neon),var(--neon2));transition:width .5s ease;}
+  .pasoNum{font-weight:800;color:var(--suave);font-size:.95rem;white-space:nowrap;}
+
+  h1{font-size:2rem;margin:.2em 0 .1em;line-height:1.1;}
+  h2{font-size:1.5rem;margin:.1em 0 .4em;}
+  p.lead{font-size:1.12rem;line-height:1.5;color:#33375f;}
+
+  /* Personaje Nova */
+  .nova{display:flex;gap:16px;align-items:flex-start;background:linear-gradient(135deg,#f1ecff,#e6f6ff);
+    border:2px dashed #c7b8ff;border-radius:20px;padding:14px 16px;margin:14px 0;}
+  .novaCara{width:78px;height:78px;flex:0 0 78px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#ffffff 0 12%,#9fe5ff 13% 55%,#6db6ff 56% 100%);
+    display:grid;place-items:center;font-size:42px;box-shadow:0 6px 18px rgba(80,120,255,.45);
+    animation:flota 3.4s ease-in-out infinite;}
+  @keyframes flota{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+  .novaTexto{flex:1;}
+  .novaTexto b{color:var(--morado);}
+  .globo{background:#fff;border-radius:14px;padding:10px 14px;font-size:1.05rem;line-height:1.45;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);}
+
+  /* Botones */
+  .btn{border:none;border-radius:16px;padding:14px 26px;font-size:1.1rem;font-weight:800;cursor:pointer;
+    font-family:inherit;transition:transform .12s ease,box-shadow .12s ease;}
+  .btn:active{transform:translateY(2px) scale(.99);}
+  .btnPrimario{background:linear-gradient(90deg,#7b5bff,#3aa0ff);color:#fff;box-shadow:0 8px 20px rgba(80,90,255,.4);}
+  .btnPrimario:hover{box-shadow:0 12px 26px rgba(80,90,255,.55);}
+  .btnSec{background:#eef0ff;color:#3a3f7a;}
+  .btnExito{background:linear-gradient(90deg,#2bd47e,#16a85e);color:#fff;box-shadow:0 8px 20px rgba(30,180,110,.4);}
+  .btnOir{background:var(--dorado);color:#6a4b00;border-radius:999px;padding:9px 16px;font-size:1rem;
+    display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 12px rgba(255,180,0,.4);}
+  .acciones{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;align-items:center;}
+
+  .campo{margin:10px 0;}
+  .campo label{display:block;font-weight:700;margin-bottom:5px;color:#3a3f7a;}
+  .campo input{width:100%;padding:13px 15px;border:2px solid #d7daf2;border-radius:14px;font-size:1.05rem;font-family:inherit;}
+  .campo input:focus{outline:none;border-color:var(--neon2);}
+
+  /* Escritorio / abrir programa */
+  .escritorio{background:linear-gradient(135deg,#2a3f7a,#13245e);border-radius:18px;padding:22px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:14px 0;}
+  .icono{background:rgba(255,255,255,.08);border:2px solid transparent;border-radius:16px;padding:14px 8px;
+    text-align:center;cursor:pointer;color:#fff;transition:transform .12s,background .12s,border .12s;}
+  .icono:hover{transform:translateY(-4px);background:rgba(255,255,255,.18);}
+  .icono.malo{animation:tiembla .4s;}
+  @keyframes tiembla{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+  .iconoArte{width:54px;height:54px;margin:0 auto 8px;border-radius:13px;display:grid;place-items:center;font-size:30px;font-weight:900;color:#fff;}
+  .icono span{font-size:.86rem;font-weight:700;display:block;}
+
+  /* Simulador diapositiva */
+  .ppt{border-radius:16px;overflow:hidden;border:1px solid #d7daf2;margin:12px 0;box-shadow:0 8px 22px rgba(0,0,0,.12);}
+  .pptTop{background:#b83b2b;color:#fff;padding:7px 14px;font-weight:700;font-size:.95rem;display:flex;gap:8px;align-items:center;}
+  .cinta{background:#f3f3f3;border-bottom:1px solid #ddd;padding:8px 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .cinta select,.cinta button{font-family:inherit;font-size:.92rem;border:1px solid #c9c9d6;background:#fff;border-radius:8px;padding:6px 9px;cursor:pointer;}
+  .cinta .tog{min-width:38px;font-weight:900;}
+  .cinta .tog.on{background:#cfe3ff;border-color:#5b8def;}
+  .swatch{width:26px;height:26px;border-radius:7px;border:2px solid #fff;box-shadow:0 0 0 1px #bbb;cursor:pointer;}
+  .swatch.on{box-shadow:0 0 0 3px #333;}
+  .lienzo{background:#fff;min-height:230px;padding:24px;display:flex;flex-direction:column;gap:14px;justify-content:center;}
+  .elemTxt{border:2px dashed transparent;border-radius:10px;padding:8px 10px;cursor:pointer;min-height:40px;transition:border .15s;}
+  .elemTxt.sel{border-color:#5b8def;background:#f3f8ff;}
+  .elemTxt small{display:block;color:#9a9ab5;font-size:.72rem;font-weight:700;margin-bottom:2px;letter-spacing:.5px;}
+
+  .checklist{background:#f6f7ff;border-radius:14px;padding:14px 16px;margin:12px 0;}
+  .checklist h3{margin:.1em 0 .5em;font-size:1.05rem;color:#3a3f7a;}
+  .checklist ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .checklist li{display:flex;align-items:center;gap:8px;font-weight:600;color:#555;font-size:.96rem;}
+  .checklist li .mk{width:24px;height:24px;border-radius:50%;background:#e1e2f0;display:grid;place-items:center;font-weight:900;color:#fff;flex:0 0 24px;transition:background .2s;}
+  .checklist li.ok .mk{background:var(--verde);}
+  .checklist li.ok{color:#1d7a45;}
+
+  .areaTexto{width:100%;min-height:90px;padding:14px;border:2px solid #d7daf2;border-radius:14px;font-size:1.05rem;font-family:inherit;resize:vertical;}
+  .objetivo{background:#fff7e6;border:2px solid #ffe0a3;border-radius:14px;padding:12px 16px;font-size:1.08rem;line-height:1.4;margin:10px 0;}
+  .objetivo b{color:#8a5a00;}
+  .matchWrap{margin:10px 0;}
+  .matchBar{height:16px;background:#e7e8f5;border-radius:999px;overflow:hidden;}
+  .matchBar > span{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff6b7a,#ffd166,#3ddc84);transition:width .25s;}
+  .matchTxt{font-weight:800;color:#3a3f7a;margin-top:5px;}
+
+  /* Animaciones */
+  .opc{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:12px 0;}
+  .opcCard{background:#f3f4ff;border:2px solid #e0e2f5;border-radius:16px;padding:16px;text-align:center;cursor:pointer;font-weight:700;transition:.15s;}
+  .opcCard:hover{transform:translateY(-3px);border-color:var(--neon2);}
+  .opcCard.sel{background:#e8f7ff;border-color:#3aa0ff;box-shadow:0 6px 16px rgba(60,160,255,.3);}
+  .opcCard .em{font-size:34px;display:block;margin-bottom:6px;}
+  .miniPrev{background:#13245e;border-radius:14px;height:130px;margin:12px 0;display:grid;place-items:center;overflow:hidden;}
+  .miniPrev b{color:#fff;font-size:1.4rem;}
+  .grupoAnim{margin:14px 0;}
+  .grupoAnim h3{margin:.2em 0;color:#3a3f7a;}
+
+  /* Resultados */
+  .anillo{width:170px;height:170px;margin:6px auto 0;position:relative;}
+  .anillo svg{transform:rotate(-90deg);}
+  .anillo .pct{position:absolute;inset:0;display:grid;place-items:center;flex-direction:column;text-align:center;}
+  .anillo .pct b{font-size:2.1rem;color:var(--morado);line-height:1;}
+  .anillo .pct small{color:var(--suave);font-weight:700;}
+  .estrellasRes{font-size:2rem;text-align:center;margin:6px 0;letter-spacing:6px;}
+  .calcBox{background:#f6f7ff;border-radius:16px;padding:16px 18px;margin:14px 0;}
+  .calcBox .fila{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed #d7daf2;font-size:1.05rem;}
+  .calcBox .fila:last-child{border-bottom:none;font-weight:900;color:var(--morado);font-size:1.2rem;}
+  .tablaRev{width:100%;border-collapse:collapse;margin:10px 0;font-size:.95rem;}
+  .tablaRev th,.tablaRev td{border:1px solid #e0e2f5;padding:9px 10px;text-align:left;vertical-align:top;}
+  .tablaRev th{background:#efeaff;color:#3a3f7a;}
+  .tablaRev .ptok{color:var(--verdetxt);font-weight:800;}
+  .tablaRev .ptbaja{color:#c23b48;font-weight:800;}
+  .badgePts{display:inline-block;background:#efeaff;color:var(--morado);font-weight:800;border-radius:999px;padding:3px 11px;font-size:.9rem;}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120px);
+    background:#1f2347;color:#fff;padding:13px 22px;border-radius:14px;font-weight:700;z-index:50;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .35s ease;max-width:90vw;text-align:center;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  .ayudita{font-size:.92rem;color:var(--suave);margin-top:8px;}
+  .oculto{display:none !important;}
+  .centro{text-align:center;}
+  .resetDoc{position:fixed;right:12px;bottom:12px;z-index:40;background:rgba(255,255,255,.15);color:#fff;
+    border:1px solid rgba(255,255,255,.35);border-radius:12px;padding:8px 12px;font-size:.82rem;cursor:pointer;font-family:inherit;}
+  @media (max-width:560px){
+    .escritorio{grid-template-columns:repeat(2,1fr);}
+    .checklist ul{grid-template-columns:1fr;}
+    h1{font-size:1.6rem;}
+  }
+</style>
+</head>
+<body>
+<div class="estrellas" id="estrellas"></div>
+<div class="escena">
+  <div class="tarjeta" id="tarjeta"><!-- contenido dinámico --></div>
+</div>
+<div class="toast" id="toast"></div>
+<button class="resetDoc" id="resetDoc">🔑 Reinicio docente</button>
+
+<script>
+/* =========================================================================
+   PRUEBA DE EJECUCIÓN · QUINTO GRADO · FORMACIÓN TECNOLÓGICA
+   Tema: "El museo del futuro" · Guía: Nova
+   13 indicadores × 3 puntos = 39 puntos · Valor 20% · Escala MEP 0–3
+   ========================================================================= */
+
+/* ---------- 1. SÍNTESIS DE VOZ (voz femenina, español neutro) ---------- */
+const VOZ = {
+  lista: [], elegida: null, lista_lista: false,
+  cargar(){
+    this.lista = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+    if(!this.lista.length) return;
+    const pref = [
+      /es-419/i,/spanish.*latin/i,/latin.*spanish/i,
+      /Paulina/i,/Mónica/i,/Monica/i,/Sabina/i,/Helena/i,/Conchita/i,/Lucia/i,/Esperanza/i,
+      /female/i,/mujer/i,/es-MX/i,/es-US/i,/es-CO/i,/es-CR/i,/es-ES/i,/^es/i
+    ];
+    let v=null;
+    for(const rx of pref){ v=this.lista.find(x=>rx.test(x.name)||rx.test(x.lang)); if(v) break; }
+    this.elegida = v || this.lista.find(x=>/^es/i.test(x.lang)) || this.lista[0];
+    this.lista_lista = true;
+  },
+  /* limpia emojis y traduce/elimina cualquier resto en inglés antes de hablar */
+  limpiar(t){
+    let s = t
+      .replace(/[\u{1F000}-\u{1FFFF}\u{2190}-\u{27BF}\u{2B00}-\u{2BFF}\uFE0F]/gu,' ')
+      .replace(/[🔊🔑⭐✨🚀🤖🎬✅❌👉👏🎉📊📝💾🖱️🎨🖥️]/gu,' ');
+    const tradu = {
+      'PowerPoint':'Power Point','Microsoft':'Microsoft','OK':'muy bien','ok':'muy bien',
+      'Word':'Word','Paint':'Paint','click':'clic','Click':'Clic','next':'siguiente','start':'empezar'
+    };
+    for(const [en,es] of Object.entries(tradu)){ s = s.replace(new RegExp('\\b'+en+'\\b','g'), es); }
+    return s.replace(/\s+/g,' ').trim();
+  },
+  hablar(t){
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    if(!this.elegida) this.cargar();
+    const u = new SpeechSynthesisUtterance(this.limpiar(t));
+    u.lang = (this.elegida && this.elegida.lang) ? this.elegida.lang : 'es-419';
+    if(this.elegida) u.voice = this.elegida;
+    u.rate = 0.92; u.pitch = 1.18; u.volume = 1;
+    speechSynthesis.speak(u);
+  },
+  callar(){ if('speechSynthesis' in window) speechSynthesis.cancel(); }
+};
+if('speechSynthesis' in window){
+  speechSynthesis.onvoiceschanged = ()=>VOZ.cargar();
+  VOZ.cargar();
+}
+
+/* ---------- 2. ESTADO DE LA PRUEBA ---------- */
+const CLAVE = 'prueba_ejecucion_5to_museo_futuro';
+
+const DIAPOS = [
+  { /* 1 portada */
+    titulo:'El museo del futuro',
+    objetivoTexto:'El museo del futuro',
+    elementos:[
+      {id:'t1', etiqueta:'TÍTULO', texto:'El museo del futuro',
+        req:{fuente:'Broadway', color:'azul', negrita:true, cursiva:true, subrayado:false, tamano:null}},
+      {id:'s1', etiqueta:'SUBTÍTULO', texto:'Estudiante y sección',
+        req:{fuente:'Book Antiqua', color:null, negrita:true, cursiva:true, subrayado:false, tamano:'32'}}
+    ],
+    nAcc:8, escala:[0,4,7,8] /* 0=>0 ; 1=>1-4 ; 2=>5-7 ; 3=>8 (umbral mínimo para cada nota) */
+  },
+  { /* 2 */
+    titulo:'Diapositiva 2',
+    objetivoTexto:'Un grupo de estudiantes visitó un museo muy especial.',
+    elementos:[
+      {id:'t2', etiqueta:'TÍTULO', texto:'El museo del futuro',
+        req:{fuente:'Berlin Sans FB Demi', color:'verde', negrita:true, cursiva:false, subrayado:false, tamano:null}},
+      {id:'b2', etiqueta:'TEXTO', texto:'Un grupo de estudiantes visitó un museo muy especial.',
+        req:{fuente:'Arial Narrow', color:null, negrita:false, cursiva:false, subrayado:true, tamano:'24'}}
+    ],
+    nAcc:6, escala:[0,3,5,6] /* 0 ; 1-3 ; 4-5 ; 6 */
+  },
+  { /* 3 */
+    titulo:'Diapositiva 3',
+    objetivoTexto:'Los estudiantes debían elegir un invento favorito.',
+    elementos:[
+      {id:'b3', etiqueta:'TEXTO', texto:'Los estudiantes debían elegir un invento favorito.',
+        req:{fuente:'Calibri', color:'naranja', negrita:true, cursiva:true, subrayado:false, tamano:'36'}}
+    ],
+    nAcc:5, escala:[0,2,4,5] /* 0 ; 1-2 ; 3-4 ; 5 */
+  },
+  { /* 4 */
+    titulo:'Diapositiva 4',
+    objetivoTexto:'Imaginar el futuro es empezar a construirlo.',
+    elementos:[
+      {id:'b4', etiqueta:'TEXTO', texto:'Imaginar el futuro es empezar a construirlo.',
+        req:{fuente:'Century Gothic', color:'morado', negrita:true, cursiva:false, subrayado:false, tamano:'32'}}
+    ],
+    nAcc:4, escala:[0,1,3,4] /* 0 ; 1 ; 2-3 ; 4 */
+  }
+];
+
+/* indicadores en orden, con su puntaje obtenido (-1 = sin contestar) */
+const ESTADO = {
+  estudiante:'', seccion:'', fecha:'',
+  indicadores:[
+    {clave:'abrir',   nombre:'Abre el programa PowerPoint',                      pts:-1, detalle:''},
+    {clave:'dig1',    nombre:'Digita la diapositiva 1',                          pts:-1, detalle:''},
+    {clave:'fmt1',    nombre:'Da formato a la diapositiva 1 (8 acciones)',       pts:-1, detalle:''},
+    {clave:'dig2',    nombre:'Digita la diapositiva 2',                          pts:-1, detalle:''},
+    {clave:'fmt2',    nombre:'Da formato a la diapositiva 2 (6 acciones)',       pts:-1, detalle:''},
+    {clave:'dig3',    nombre:'Digita la diapositiva 3',                          pts:-1, detalle:''},
+    {clave:'fmt3',    nombre:'Da formato a la diapositiva 3 (5 acciones)',       pts:-1, detalle:''},
+    {clave:'dig4',    nombre:'Digita la diapositiva 4',                          pts:-1, detalle:''},
+    {clave:'fmt4',    nombre:'Da formato a la diapositiva 4 (4 acciones)',       pts:-1, detalle:''},
+    {clave:'anim1',   nombre:'Animación y transición de la diapositiva 1',       pts:-1, detalle:''},
+    {clave:'anim2',   nombre:'Animación y transición de la diapositiva 2',       pts:-1, detalle:''},
+    {clave:'anim3',   nombre:'Animación y transición de la diapositiva 3',       pts:-1, detalle:''},
+    {clave:'anim4',   nombre:'Animación y transición de la diapositiva 4',       pts:-1, detalle:''}
+  ]
+};
+const TOTAL_PUNTOS = 39, VALOR_PORCENTUAL = 20;
+function setPts(clave, pts, detalle){
+  const i = ESTADO.indicadores.find(x=>x.clave===clave);
+  if(i){ i.pts = pts; i.detalle = detalle||''; }
+}
+
+/* ---------- 3. UTILIDADES ---------- */
+const $ = sel => document.querySelector(sel);
+const tarjeta = $('#tarjeta');
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9ñ ]/g,' ').replace(/\s+/g,' ').trim(); }
+function similitud(a,b){
+  a=norm(a); b=norm(b);
+  if(!a) return 0;
+  if(a===b) return 1;
+  const pa=a.split(' '), pb=new Set(b.split(' '));
+  let ok=0; pa.forEach(p=>{ if(pb.has(p)) ok++; });
+  let s = ok/Math.max(pa.length, b.split(' ').length);
+  /* bonificación por longitud parecida */
+  const lr = Math.min(a.length,b.length)/Math.max(a.length,b.length);
+  return Math.max(0, Math.min(1, s*0.7 + lr*0.3));
+}
+function estrellasTxt(n){ return '⭐'.repeat(n) + '·'.repeat(Math.max(0,3-n)); }
+function actualizarProgreso(barEl, numEl){
+  const hechos = ESTADO.indicadores.filter(i=>i.pts>=0).length;
+  if(barEl) barEl.style.width = (hechos/13*100)+'%';
+  if(numEl) numEl.textContent = 'Paso '+Math.min(hechos+1,13)+' de 13';
+}
+
+/* ---------- 4. CONTROL DE INTENTO ÚNICO ---------- */
+function yaResuelta(){ try{ return localStorage.getItem(CLAVE)==='1'; }catch(e){ return false; } }
+function bloquear(){ try{ localStorage.setItem(CLAVE,'1'); }catch(e){} }
+function liberar(){ try{ localStorage.removeItem(CLAVE); }catch(e){} }
+
+/* ---------- 5. ESTRELLAS DE FONDO ---------- */
+(function(){ const c=$('#estrellas'); let h='';
+  for(let i=0;i<60;i++){ const s=Math.random()*2+1;
+    h+=`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;width:${s}px;height:${s}px;animation-delay:${Math.random()*3}s"></i>`; }
+  c.innerHTML=h; })();
+
+/* ============================== PANTALLAS ============================== */
+let PASO = 0;            // índice de pantalla del flujo
+let intentosAbrir = 0;   // clics fallidos al abrir el programa
+
+const FLUJO = [
+  pantallaInicio,
+  pantallaAbrir,
+  ()=>pantallaDigitar(0), ()=>pantallaFormato(0),
+  ()=>pantallaDigitar(1), ()=>pantallaFormato(1),
+  ()=>pantallaDigitar(2), ()=>pantallaFormato(2),
+  ()=>pantallaDigitar(3), ()=>pantallaFormato(3),
+  pantallaAnimaciones,
+  pantallaEntregar,
+  pantallaResultados
+];
+function avanzar(){ PASO++; FLUJO[PASO](); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* encabezado reutilizable con barra de progreso y botón de voz */
+function cabecera(etapa, textoVoz){
+  return `<div class="barra">
+      <span class="etapaTag">${etapa}</span>
+      <div class="progreso"><span id="barProg"></span></div>
+      <span class="pasoNum" id="numProg"></span>
+    </div>`;
+}
+function novaBloque(texto){
+  return `<div class="nova">
+    <div class="novaCara">🤖</div>
+    <div class="novaTexto">
+      <div class="globo" id="globoNova">${texto}</div>
+      <button class="btn btnOir" style="margin-top:10px" onclick="VOZ.hablar(document.getElementById('globoNova').dataset.voz)">🔊 Oír de nuevo</button>
+    </div></div>`;
+}
+function ponerVoz(txt){ const g=$('#globoNova'); if(g){ g.dataset.voz = txt; } VOZ.hablar(txt); }
+
+/* ---------- PANTALLA 0: INICIO ---------- */
+function pantallaInicio(){
+  if(yaResuelta()){ pantallaBloqueada(); return; }
+  const voz = 'Hola, soy Nova. Te doy la bienvenida al Museo del Futuro. Hoy vas a crear una presentación con cuatro diapositivas. Primero, escribe tu nombre, tu sección y la fecha. Cuando termines, presiona el botón comenzar.';
+  tarjeta.innerHTML = `
+    <div class="centro">
+      <div class="novaCara" style="margin:0 auto 8px;width:96px;height:96px;font-size:52px;">🤖</div>
+      <h1>El Museo del Futuro</h1>
+      <p class="lead">Prueba de Ejecución · Formación Tecnológica · Quinto Grado</p>
+    </div>
+    ${novaBloque(voz)}
+    <div class="campo"><label>✏️ Mi nombre completo</label><input id="inNombre" placeholder="Escribe tu nombre" autocomplete="off"></div>
+    <div class="campo"><label>🏫 Mi sección</label><input id="inSeccion" placeholder="Por ejemplo: 5-1" autocomplete="off"></div>
+    <div class="campo"><label>📅 Fecha</label><input id="inFecha" placeholder="Día / mes / año" autocomplete="off"></div>
+    <div class="objetivo"><b>¿Qué voy a hacer?</b> Abrir PowerPoint, escribir y dar formato a 4 diapositivas, y agregar animaciones y transiciones. Vale <b>39 puntos</b> y un <b>20%</b> de la nota.</div>
+    <div class="acciones">
+      <button class="btn btnPrimario" id="btnComenzar">🚀 Comenzar</button>
+      <button class="btn btnOir" onclick="VOZ.hablar('${voz.replace(/'/g,'')}')">🔊 Escuchar</button>
+    </div>
+    <p class="ayudita">Esta prueba se realiza una sola vez. Trabaja con calma y por tu cuenta.</p>`;
+  $('#globoNova').dataset.voz = voz;
+  setTimeout(()=>VOZ.hablar(voz), 450);
+  $('#btnComenzar').onclick = ()=>{
+    const n=$('#inNombre').value.trim(), s=$('#inSeccion').value.trim(), f=$('#inFecha').value.trim();
+    if(!n){ toast('Escribe tu nombre primero 😊'); VOZ.hablar('Por favor, escribe tu nombre antes de comenzar.'); $('#inNombre').focus(); return; }
+    ESTADO.estudiante=n; ESTADO.seccion=s; ESTADO.fecha=f;
+    avanzar();
+  };
+}
+
+function pantallaBloqueada(){
+  tarjeta.innerHTML = `<div class="centro">
+    <div class="novaCara" style="margin:0 auto 10px;width:90px;height:90px;font-size:48px;">🤖</div>
+    <h1>Esta prueba ya fue entregada</h1>
+    <p class="lead">Esta prueba de ejecución se contesta una sola vez. Si necesitas que otro estudiante la realice, la persona docente debe presionar <b>“Reinicio docente”</b> abajo a la derecha.</p>
+  </div>`;
+  VOZ.hablar('Esta prueba ya fue entregada. Se contesta una sola vez. La persona docente puede reiniciarla para el siguiente estudiante.');
+}
+
+/* ---------- PANTALLA 1: ABRIR POWERPOINT ---------- */
+function pantallaAbrir(){
+  intentosAbrir = 0;
+  const voz = 'Muy bien, '+ (ESTADO.estudiante.split(' ')[0]||'') +'. Para empezar, busca el programa PowerPoint en el escritorio y haz clic sobre él. Es el programa de color anaranjado para hacer presentaciones.';
+  const iconos = [
+    {n:'PowerPoint', e:'P', c:'#c43e1c', correcto:true},
+    {n:'Word', e:'W', c:'#2b579a'},
+    {n:'Calculadora', e:'🧮', c:'#3a3f7a'},
+    {n:'Paint', e:'🎨', c:'#6b4ea8'},
+    {n:'Navegador', e:'🌐', c:'#1f8acb'},
+    {n:'Excel', e:'X', c:'#1d6f42'},
+    {n:'Música', e:'🎵', c:'#b8338a'},
+    {n:'Cámara', e:'📷', c:'#555'}
+  ];
+  tarjeta.innerHTML = cabecera('Etapa 1 · Abrir')
+    + novaBloque(voz)
+    + `<h2>Abre el programa PowerPoint 🖱️</h2>
+       <p class="lead">Haz clic en el ícono correcto del escritorio.</p>
+       <div class="escritorio" id="escritorio"></div>`;
+  $('#globoNova').dataset.voz = voz;
+  const cont = $('#escritorio');
+  iconos.forEach((ic,idx)=>{
+    const div = document.createElement('div');
+    div.className='icono';
+    div.innerHTML = `<div class="iconoArte" style="background:${ic.c}">${ic.e}</div><span>${ic.n}</span>`;
+    div.onclick = ()=>{
+      if(ic.correcto){
+        let pts = intentosAbrir===0?3 : intentosAbrir===1?2 : 1;
+        const det = pts===3?'Abrió PowerPoint de forma autónoma.'
+                  : pts===2?'Abrió PowerPoint tras un intento.'
+                  : 'Abrió PowerPoint tras varios intentos.';
+        setPts('abrir', pts, det);
+        VOZ.hablar('¡Excelente! Abriste el programa PowerPoint. Ahora vamos a crear la primera diapositiva.');
+        toast('¡Programa abierto! '+estrellasTxt(pts));
+        setTimeout(avanzar, 900);
+      }else{
+        intentosAbrir++;
+        div.classList.add('malo'); setTimeout(()=>div.classList.remove('malo'),420);
+        VOZ.hablar('Ese no es. Busca el programa de presentaciones de color anaranjado, con la letra P.');
+        toast('Inténtalo otra vez 🙂');
+      }
+    };
+    cont.appendChild(div);
+  });
+  actualizarProgreso($('#barProg'), $('#numProg'));
+  setTimeout(()=>VOZ.hablar(voz), 450);
+}
+
+/* ---------- PANTALLAS DE DIGITAR ---------- */
+function pantallaDigitar(idx){
+  const d = DIAPOS[idx];
+  const objetivo = d.objetivoTexto;
+  const voz = 'Vamos con la diapositiva '+(idx+1)+'. Escribe en la caja el siguiente texto, igualito al modelo: '+objetivo;
+  tarjeta.innerHTML = cabecera('Etapa 2 · Digitar diapositiva '+(idx+1))
+    + novaBloque(voz)
+    + `<h2>📝 Escribe la diapositiva ${idx+1}</h2>
+       <div class="objetivo"><b>Copia este texto:</b><br>“${objetivo}”
+         <button class="btn btnOir" style="margin-top:8px" onclick="VOZ.hablar('Escribe: ${objetivo.replace(/'/g,'')}')">🔊 Oír el texto</button>
+       </div>
+       <textarea class="areaTexto" id="areaTxt" placeholder="Escribe aquí…"></textarea>
+       <div class="matchWrap">
+         <div class="matchBar"><span id="matchBar"></span></div>
+         <div class="matchTxt" id="matchTxt">Coincidencia: 0%</div>
+       </div>
+       <div class="acciones"><button class="btn btnExito" id="btnList">✅ Listo, continuar</button></div>
+       <p class="ayudita">Respeta las mayúsculas, los acentos y los signos. La barra te muestra qué tan parecido va.</p>`;
+  $('#globoNova').dataset.voz = voz;
+  const area=$('#areaTxt'), bar=$('#matchBar'), txt=$('#matchTxt');
+  area.addEventListener('input', ()=>{
+    const s = Math.round(similitud(area.value, objetivo)*100);
+    bar.style.width = s+'%'; txt.textContent = 'Coincidencia: '+s+'%';
+  });
+  $('#btnList').onclick = ()=>{
+    const s = similitud(area.value, objetivo);
+    let pts = s>=0.9?3 : s>=0.6?2 : s>=0.25?1 : 0;
+    const det = `Escribió: “${area.value.trim()||'(vacío)'}” · Modelo: “${objetivo}” · Coincidencia ${Math.round(s*100)}%`;
+    setPts('dig'+(idx+1), pts, det);
+    if(pts>=2) VOZ.hablar('¡Muy bien escrito! Ahora vamos a darle formato.');
+    else VOZ.hablar('Listo. Recuerda que puedes practicar a escribir igual al modelo. Sigamos con el formato.');
+    toast('Texto guardado '+estrellasTxt(pts));
+    setTimeout(avanzar, 850);
+  };
+  actualizarProgreso($('#barProg'), $('#numProg'));
+  setTimeout(()=>VOZ.hablar(voz), 450);
+}
+
+/* ---------- PANTALLAS DE FORMATO ---------- */
+const FUENTES = ['(Predeterminada)','Broadway','Book Antiqua','Berlin Sans FB Demi','Arial Narrow','Calibri','Century Gothic','Comic Sans MS'];
+const TAMANOS = ['(Tamaño)','18','24','28','32','36','40'];
+const COLORES = [
+  {k:'azul', hex:'var(--azul)', nom:'Azul'},
+  {k:'verde', hex:'var(--verdetxt)', nom:'Verde'},
+  {k:'naranja', hex:'var(--naranja)', nom:'Anaranjado'},
+  {k:'morado', hex:'var(--morado)', nom:'Morado'},
+  {k:'negro', hex:'#222', nom:'Negro'}
+];
+const FUENTE_CSS = {
+  'Broadway':"'Broadway','Impact',fantasy",
+  'Book Antiqua':"'Book Antiqua','Palatino Linotype',Palatino,serif",
+  'Berlin Sans FB Demi':"'Berlin Sans FB Demi','Berlin Sans FB','Trebuchet MS',sans-serif",
+  'Arial Narrow':"'Arial Narrow','Arial',sans-serif",
+  'Calibri':"'Calibri','Segoe UI',sans-serif",
+  'Century Gothic':"'Century Gothic','Apple Gothic','Futura',sans-serif",
+  'Comic Sans MS':"'Comic Sans MS',cursive",
+  '(Predeterminada)':"'Segoe UI',sans-serif"
+};
+
+function pantallaFormato(idx){
+  const d = DIAPOS[idx];
+  // estado de formato por elemento
+  const fmt = {};
+  d.elementos.forEach(e=>{ fmt[e.id] = {fuente:'(Predeterminada)', color:null, tamano:null, negrita:false, cursiva:false, subrayado:false}; });
+  let selId = d.elementos[0].id;
+
+  const voz = 'Ahora dale formato a la diapositiva '+(idx+1)+'. Selecciona un texto tocándolo y usa la barra de herramientas para cambiar la letra, el color, el tamaño, la negrita, la cursiva o el subrayado. Sigue la lista de acciones que aparece abajo.';
+
+  tarjeta.innerHTML = cabecera('Etapa 2 · Formato diapositiva '+(idx+1))
+    + novaBloque(voz)
+    + `<h2>🎨 Da formato a la diapositiva ${idx+1}</h2>
+       <p class="lead">Toca un texto para seleccionarlo y aplica el formato que se pide.</p>
+       <div class="ppt">
+         <div class="pptTop">📊 PowerPoint — Presentación</div>
+         <div class="cinta">
+           <select id="selFuente">${FUENTES.map(f=>`<option>${f}</option>`).join('')}</select>
+           <select id="selTam">${TAMANOS.map(t=>`<option>${t}</option>`).join('')}</select>
+           <button class="tog" id="tgB" title="Negrita"><b>N</b></button>
+           <button class="tog" id="tgI" title="Cursiva"><i>K</i></button>
+           <button class="tog" id="tgU" title="Subrayado"><u>S</u></button>
+           ${COLORES.map(c=>`<span class="swatch" data-c="${c.k}" title="${c.nom}" style="background:${c.hex}"></span>`).join('')}
+         </div>
+         <div class="lienzo" id="lienzo"></div>
+       </div>
+       <div class="checklist"><h3>Acciones por aplicar (${d.nAcc} en total)</h3><ul id="lista"></ul></div>
+       <div class="acciones"><button class="btn btnExito" id="btnFmtList">✅ Listo, continuar</button></div>`;
+  $('#globoNova').dataset.voz = voz;
+
+  const lienzo=$('#lienzo');
+  function pintarLienzo(){
+    lienzo.innerHTML='';
+    d.elementos.forEach(e=>{
+      const f = fmt[e.id];
+      const div=document.createElement('div');
+      div.className='elemTxt'+(e.id===selId?' sel':'');
+      const cHex = f.color ? (COLORES.find(c=>c.k===f.color)||{}).hex : '#222';
+      div.innerHTML = `<small>${e.etiqueta}</small><span style="
+        font-family:${FUENTE_CSS[f.fuente]||'inherit'};
+        color:${cHex};
+        font-weight:${f.negrita?'800':'400'};
+        font-style:${f.cursiva?'italic':'normal'};
+        text-decoration:${f.subrayado?'underline':'none'};
+        font-size:${f.tamano?(parseInt(f.tamano)/16+0.4)+'rem':'1.15rem'};
+        ">${e.texto}</span>`;
+      div.onclick=()=>{ selId=e.id; sincronizar(); };
+      lienzo.appendChild(div);
+    });
+  }
+  function sincronizar(){
+    const f=fmt[selId];
+    $('#selFuente').value = f.fuente;
+    $('#selTam').value = f.tamano || '(Tamaño)';
+    $('#tgB').classList.toggle('on', f.negrita);
+    $('#tgI').classList.toggle('on', f.cursiva);
+    $('#tgU').classList.toggle('on', f.subrayado);
+    document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('on', s.dataset.c===f.color));
+    pintarLienzo();
+    pintarLista();
+  }
+  // ¿cuántas acciones requeridas están aplicadas?
+  function contarAcciones(){
+    let total=0, ok=0; const items=[];
+    d.elementos.forEach(e=>{
+      const r=e.req, f=fmt[e.id];
+      if(r.fuente){ total++; const v=(f.fuente===r.fuente); if(v)ok++; items.push({el:e.etiqueta,t:'Letra '+r.fuente,ok:v}); }
+      if(r.color){ total++; const v=(f.color===r.color); if(v)ok++; items.push({el:e.etiqueta,t:'Color '+ (COLORES.find(c=>c.k===r.color)||{}).nom,ok:v}); }
+      if(r.tamano){ total++; const v=(f.tamano===r.tamano); if(v)ok++; items.push({el:e.etiqueta,t:'Tamaño '+r.tamano,ok:v}); }
+      if(r.negrita){ total++; const v=f.negrita; if(v)ok++; items.push({el:e.etiqueta,t:'Negrita',ok:v}); }
+      if(r.cursiva){ total++; const v=f.cursiva; if(v)ok++; items.push({el:e.etiqueta,t:'Cursiva',ok:v}); }
+      if(r.subrayado){ total++; const v=f.subrayado; if(v)ok++; items.push({el:e.etiqueta,t:'Subrayado',ok:v}); }
+    });
+    return {total, ok, items};
+  }
+  function pintarLista(){
+    const {items}=contarAcciones();
+    $('#lista').innerHTML = items.map(it=>`<li class="${it.ok?'ok':''}">
+      <span class="mk">${it.ok?'✓':''}</span> <span><b style="opacity:.7;font-size:.8em">${it.el}</b> · ${it.t}</span></li>`).join('');
+  }
+
+  // controles
+  $('#selFuente').onchange=e=>{ fmt[selId].fuente=e.target.value; sincronizar(); };
+  $('#selTam').onchange=e=>{ fmt[selId].tamano = e.target.value==='(Tamaño)'?null:e.target.value; sincronizar(); };
+  $('#tgB').onclick=()=>{ fmt[selId].negrita=!fmt[selId].negrita; sincronizar(); };
+  $('#tgI').onclick=()=>{ fmt[selId].cursiva=!fmt[selId].cursiva; sincronizar(); };
+  $('#tgU').onclick=()=>{ fmt[selId].subrayado=!fmt[selId].subrayado; sincronizar(); };
+  document.querySelectorAll('.swatch').forEach(s=>{
+    s.onclick=()=>{ fmt[selId].color = (fmt[selId].color===s.dataset.c)?null:s.dataset.c; sincronizar(); };
+  });
+
+  $('#btnFmtList').onclick=()=>{
+    const {ok}=contarAcciones();
+    const esc=d.escala; // [umbral nota0, nota1, nota2, nota3]
+    let pts=0;
+    if(ok>=esc[3]) pts=3; else if(ok>=esc[2]) pts=2; else if(ok>=esc[1]) pts=1; else pts=0;
+    const det = `Aplicó ${ok} de ${d.nAcc} acciones de formato correctas.`;
+    setPts('fmt'+(idx+1), pts, det);
+    if(pts>=2) VOZ.hablar('¡Buen trabajo con el formato! Continuemos.');
+    else VOZ.hablar('Listo. Recuerda revisar la lista de acciones. Sigamos.');
+    toast(`Formato: ${ok}/${d.nAcc} acciones `+estrellasTxt(pts));
+    setTimeout(avanzar, 850);
+  };
+
+  sincronizar();
+  actualizarProgreso($('#barProg'), $('#numProg'));
+  setTimeout(()=>VOZ.hablar(voz), 450);
+}
+
+/* ---------- PANTALLA ANIMACIONES Y TRANSICIONES (4 diapositivas) ---------- */
+function pantallaAnimaciones(){
+  const ANIMS = [
+    {k:'aparecer', n:'Aparecer', e:'✨'},
+    {k:'volar', n:'Volar', e:'🚀'},
+    {k:'rebotar', n:'Rebotar', e:'🏀'},
+    {k:'zoom', n:'Zoom', e:'🔍'}
+  ];
+  const TRANS = [
+    {k:'desvanecer', n:'Desvanecer', e:'🌫️'},
+    {k:'empuje', n:'Empuje', e:'➡️'},
+    {k:'cubrir', n:'Cubrir', e:'🟦'},
+    {k:'rotar', n:'Rotar', e:'🔄'}
+  ];
+  const eleccion = [ {a:null,t:null},{a:null,t:null},{a:null,t:null},{a:null,t:null} ];
+
+  const voz = 'Última parte. Para cada diapositiva, elige una animación para el texto y una transición para la diapositiva. Toca una tarjeta de cada grupo. Mira la vista previa y, al final, presiona entregar mi prueba.';
+
+  let html = cabecera('Etapa 2 · Animación y transición') + novaBloque(voz)
+    + `<h2>🎬 Animaciones y transiciones</h2>
+       <p class="lead">En cada diapositiva, elige <b>una animación</b> y <b>una transición</b>.</p>
+       <div class="miniPrev"><b id="prevTxt">El museo del futuro</b></div>`;
+  for(let i=0;i<4;i++){
+    html += `<div class="grupoAnim">
+      <h3>Diapositiva ${i+1}</h3>
+      <div style="font-weight:700;color:#6b6f97;margin:4px 0">Animación del texto:</div>
+      <div class="opc" data-tipo="anim" data-d="${i}">
+        ${ANIMS.map(a=>`<div class="opcCard" data-v="${a.k}"><span class="em">${a.e}</span>${a.n}</div>`).join('')}
+      </div>
+      <div style="font-weight:700;color:#6b6f97;margin:8px 0 4px">Transición de la diapositiva:</div>
+      <div class="opc" data-tipo="trans" data-d="${i}">
+        ${TRANS.map(t=>`<div class="opcCard" data-v="${t.k}"><span class="em">${t.e}</span>${t.n}</div>`).join('')}
+      </div>
+    </div>`;
+  }
+  html += `<div class="acciones"><button class="btn btnExito" id="btnAnimList">✅ Listo, continuar</button></div>`;
+  tarjeta.innerHTML = html;
+  $('#globoNova').dataset.voz = voz;
+
+  // vista previa animada
+  function animarPrev(){
+    const t=$('#prevTxt'); t.style.animation='none'; void t.offsetWidth;
+    t.style.animation='flota 1.2s ease';
+  }
+  document.querySelectorAll('.opc').forEach(grp=>{
+    const tipo=grp.dataset.tipo, di=+grp.dataset.d;
+    grp.querySelectorAll('.opcCard').forEach(card=>{
+      card.onclick=()=>{
+        grp.querySelectorAll('.opcCard').forEach(c=>c.classList.remove('sel'));
+        card.classList.add('sel');
+        eleccion[di][tipo==='anim'?'a':'t'] = card.dataset.v;
+        animarPrev();
+        VOZ.callar();
+      };
+    });
+  });
+
+  $('#btnAnimList').onclick=()=>{
+    for(let i=0;i<4;i++){
+      const e=eleccion[i];
+      const hechos = (e.a?1:0)+(e.t?1:0);
+      let pts = hechos===2?3 : hechos===1?2 : 0;
+      const det = `Animación: ${e.a||'ninguna'} · Transición: ${e.t||'ninguna'}`;
+      setPts('anim'+(i+1), pts, det);
+    }
+    VOZ.hablar('¡Terminaste todas las diapositivas! Cuando estés segura o seguro, entrega tu prueba.');
+    toast('¡Animaciones listas! 🎬');
+    setTimeout(avanzar, 850);
+  };
+  actualizarProgreso($('#barProg'), $('#numProg'));
+  setTimeout(()=>VOZ.hablar(voz), 450);
+}
+
+/* ---------- PANTALLA ENTREGAR (confirmación, una sola vez) ---------- */
+function pantallaEntregar(){
+  const voz = 'Has completado todas las actividades. Recuerda que la prueba se entrega una sola vez. Cuando presiones entregar mi prueba, verás tu puntuación y tu porcentaje.';
+  tarjeta.innerHTML = cabecera('Entregar')
+    + novaBloque(voz)
+    + `<div class="centro">
+        <h1>¿Lista o listo para entregar? 📨</h1>
+        <p class="lead"><b>${ESTADO.estudiante}</b>${ESTADO.seccion?(' · Sección '+ESTADO.seccion):''}</p>
+        <p class="lead">Completaste las 4 diapositivas con su texto, formato, animación y transición.</p>
+        <div class="objetivo centro"><b>Importante:</b> esta prueba se entrega <b>una sola vez</b>. Al entregar, se calculará tu nota.</div>
+        <div class="acciones" style="justify-content:center">
+          <button class="btn btnExito" id="btnEntregar">📊 Entregar mi prueba</button>
+        </div>
+      </div>`;
+  $('#globoNova').dataset.voz = voz;
+  $('#barProg').style.width='100%'; $('#numProg').textContent='Paso 13 de 13';
+  $('#btnEntregar').onclick=()=>{ bloquear(); avanzar(); };
+  setTimeout(()=>VOZ.hablar(voz), 450);
+}
+
+/* ---------- PANTALLA RESULTADOS + REVISIÓN DE ERRORES ---------- */
+function pantallaResultados(){
+  const obtenidos = ESTADO.indicadores.reduce((s,i)=>s+Math.max(0,i.pts),0);
+  const porcentajeLogro = Math.round(obtenidos/TOTAL_PUNTOS*100);
+  const notaPonderada = (obtenidos/TOTAL_PUNTOS*VALOR_PORCENTUAL);
+  const notaTxt = notaPonderada.toFixed(2).replace('.',',');
+  // estrellas globales
+  let estr = porcentajeLogro>=90?3 : porcentajeLogro>=60?2 : porcentajeLogro>=30?1 : 0;
+  // anillo
+  const R=70, C=2*Math.PI*R, off = C*(1-porcentajeLogro/100);
+
+  let mensaje;
+  if(porcentajeLogro>=90) mensaje='¡Felicitaciones! Hiciste un trabajo excelente en el Museo del Futuro.';
+  else if(porcentajeLogro>=60) mensaje='¡Muy bien! Lograste la mayoría de las actividades. Sigue practicando.';
+  else if(porcentajeLogro>=30) mensaje='Buen esfuerzo. Hay actividades que puedes repasar para mejorar.';
+  else mensaje='Gracias por participar. Vamos a repasar juntos para la próxima.';
+
+  const voz = `${mensaje} Obtuviste ${obtenidos} de ${TOTAL_PUNTOS} puntos, es decir ${porcentajeLogro} por ciento. Tu nota es ${notaTxt} de veinte por ciento. Abajo puedes revisar tus respuestas.`;
+
+  // filas de revisión
+  const filas = ESTADO.indicadores.map(i=>{
+    const p = Math.max(0,i.pts);
+    const cls = p>=2?'ptok':'ptbaja';
+    return `<tr>
+      <td>${i.nombre}</td>
+      <td class="${cls}">${p} / 3</td>
+      <td>${i.detalle||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  tarjeta.innerHTML = `
+    <div class="centro">
+      <div class="novaCara" style="margin:0 auto 6px;width:84px;height:84px;font-size:44px;">🤖</div>
+      <h1>¡Prueba terminada!</h1>
+      <p class="lead"><b>${ESTADO.estudiante}</b>${ESTADO.seccion?(' · '+ESTADO.seccion):''}${ESTADO.fecha?(' · '+ESTADO.fecha):''}</p>
+      <div class="anillo">
+        <svg width="170" height="170">
+          <circle cx="85" cy="85" r="${R}" stroke="#e7e8f5" stroke-width="16" fill="none"></circle>
+          <circle cx="85" cy="85" r="${R}" stroke="url(#g)" stroke-width="16" fill="none"
+            stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}"
+            style="transition:stroke-dashoffset 1.2s ease" id="aro"></circle>
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5ed0ff"/><stop offset="100%" stop-color="#b98bff"/>
+          </linearGradient></defs>
+        </svg>
+        <div class="pct"><div><b>${porcentajeLogro}%</b><br><small>de logro</small></div></div>
+      </div>
+      <div class="estrellasRes">${'⭐'.repeat(estr)}${'☆'.repeat(3-estr)}</div>
+    </div>
+
+    ${novaBloque(mensaje)}
+
+    <div class="calcBox">
+      <div class="fila"><span>Puntos obtenidos</span><span><b>${obtenidos}</b> de ${TOTAL_PUNTOS}</span></div>
+      <div class="fila"><span>Porcentaje de logro</span><span>${obtenidos} ÷ ${TOTAL_PUNTOS} × 100 = <b>${porcentajeLogro}%</b></span></div>
+      <div class="fila"><span>Valor de la prueba</span><span>${VALOR_PORCENTUAL}%</span></div>
+      <div class="fila"><span>Nota ponderada</span><span>${obtenidos} ÷ ${TOTAL_PUNTOS} × ${VALOR_PORCENTUAL} = ${notaTxt}%</span></div>
+    </div>
+
+    <div class="acciones">
+      <button class="btn btnPrimario" id="btnRevisar">🔍 Revisar mis respuestas</button>
+      <button class="btn btnOir" onclick="VOZ.hablar(document.getElementById('globoNova').dataset.voz)">🔊 Oír de nuevo</button>
+    </div>
+
+    <div class="oculto" id="revision">
+      <h2 style="margin-top:18px">🔍 Revisión por indicador</h2>
+      <p class="ayudita">Verde = bien logrado (2 o 3 puntos). Rojo = conviene repasar (0 o 1 punto). Escala MEP 0 a 3.</p>
+      <table class="tablaRev">
+        <thead><tr><th>Indicador</th><th>Puntos</th><th>Lo que hiciste</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+      <p class="ayudita" style="margin-top:14px">Escala MEP: <b>3</b> = lo hizo de forma autónoma · <b>2</b> = con validación ocasional · <b>1</b> = con mucha ayuda · <b>0</b> = no lo logró.</p>
+    </div>`;
+  $('#globoNova').dataset.voz = voz;
+  setTimeout(()=>{ const aro=$('#aro'); if(aro) aro.style.strokeDashoffset=off; }, 200);
+  $('#btnRevisar').onclick=()=>{
+    $('#revision').classList.remove('oculto');
+    $('#btnRevisar').classList.add('oculto');
+    VOZ.hablar('Aquí puedes ver, actividad por actividad, lo que hiciste y los puntos que obtuviste.');
+    window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+  };
+  setTimeout(()=>VOZ.hablar(voz), 500);
+}
+
+/* ---------- REINICIO DOCENTE ---------- */
+$('#resetDoc').onclick = ()=>{
+  VOZ.callar();
+  const ok = confirm('Reinicio docente:\n\n¿Desea borrar esta prueba y dejarla lista para el siguiente estudiante? Se perderán las respuestas actuales.');
+  if(ok){
+    liberar();
+    ESTADO.estudiante=''; ESTADO.seccion=''; ESTADO.fecha='';
+    ESTADO.indicadores.forEach(i=>{ i.pts=-1; i.detalle=''; });
+    PASO=0; intentosAbrir=0;
+    FLUJO[0]();
+    toast('Prueba reiniciada para el siguiente estudiante ✅');
+  }
+};
+
+/* ---------- ARRANQUE ---------- */
+window.addEventListener('load', ()=>{ setTimeout(()=>VOZ.cargar(), 200); FLUJO[0](); });
+</script>
+</body>
+</html>
