@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Examen de Santiago – 5.° Grado TIC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+  :root {
+    --bg: #FFF8F0;
+    --card: #FFFFFF;
+    --orange: #FF8C42;
+    --orange-dark: #E06B1E;
+    --blue: #4A90D9;
+    --blue-dark: #2D6FAD;
+    --green: #4CAF50;
+    --green-dark: #2E7D32;
+    --purple: #9C59D1;
+    --purple-dark: #6B3FA0;
+    --red: #E53935;
+    --yellow: #FFD600;
+    --text: #2C2C2C;
+    --muted: #7A7A7A;
+    --radius: 20px;
+    --shadow: 0 6px 20px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── PANTALLAS ── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; align-items: center; padding: 1.5rem 1rem 3rem; }
+  .screen.active { display: flex; }
+
+  /* ── ENCABEZADO GLOBAL ── */
+  .top-bar {
+    width: 100%; max-width: 680px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.2rem;
+  }
+  .stars-display {
+    background: var(--yellow);
+    border-radius: 30px;
+    padding: 6px 16px;
+    font-size: 18px;
+    font-weight: 900;
+    color: #7A4F00;
+  }
+  .audio-fab {
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+  }
+  .audio-fab:hover { background: var(--blue-dark); }
+
+  /* ── PANTALLA BIENVENIDA ── */
+  #screen-welcome {
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(160deg, #4A90D9 0%, #9C59D1 100%);
+  }
+  .welcome-avatar { font-size: 90px; margin-bottom: 0.5rem; }
+  .welcome-title { font-size: 36px; font-weight: 900; color: white; line-height: 1.1; }
+  .welcome-sub { font-size: 17px; color: rgba(255,255,255,0.9); margin: 0.6rem 0 1.8rem; }
+  .welcome-stars { font-size: 28px; margin-bottom: 1.5rem; }
+  .btn-start {
+    background: var(--yellow);
+    color: #7A4F00;
+    border: none;
+    border-radius: 50px;
+    padding: 18px 48px;
+    font-size: 22px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    box-shadow: 0 8px 0 #B8960A;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .btn-start:active { transform: translateY(4px); box-shadow: 0 4px 0 #B8960A; }
+
+  /* ── TARJETAS DE ACTIVIDAD ── */
+  .act-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.4rem;
+    width: 100%; max-width: 680px;
+    margin-bottom: 1rem;
+  }
+  .act-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .act-icon { font-size: 30px; }
+  .act-title { font-size: 18px; font-weight: 900; }
+  .act-instruction {
+    font-size: 15px; color: var(--muted);
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  /* ── BOTONES DE OPCIÓN GRANDES ── */
+  .opts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .opt-btn {
+    background: white;
+    border: 4px solid #E0E0E0;
+    border-radius: 16px;
+    padding: 14px 10px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.1s, border-color 0.15s;
+    min-height: 90px;
+    justify-content: center;
+  }
+  .opt-btn .opt-icon { font-size: 38px; }
+  .opt-btn:hover:not(:disabled) { transform: scale(1.04); border-color: var(--blue); }
+  .opt-btn.correct { border-color: var(--green) !important; background: #E8F5E9; }
+  .opt-btn.wrong { border-color: var(--red) !important; background: #FFEBEE; animation: shake .4s; }
+  .opt-btn:disabled { cursor: default; }
+
+  /* ── ALGORITMO: ORDENAR PASOS ── */
+  .steps-pool {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .step-chip {
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: grab;
+    font-family: 'Nunito', sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  .step-chip.placed { opacity: 0.35; pointer-events: none; }
+  .step-chip:hover { transform: scale(1.05); }
+  .steps-zone {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .step-slot {
+    background: #F5F5F5;
+    border: 3px dashed #BDBDBD;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+    min-height: 48px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .step-slot.filled { border-style: solid; border-color: var(--blue); background: #E3F2FD; color: var(--text); }
+  .step-slot.slot-correct { border-color: var(--green); background: #E8F5E9; }
+  .step-slot.slot-wrong { border-color: var(--red); background: #FFEBEE; }
+  .slot-num {
+    background: var(--muted);
+    color: white;
+    border-radius: 50%;
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900;
+    flex-shrink: 0;
+  }
+  .step-slot.slot-correct .slot-num { background: var(--green); }
+  .step-slot.slot-wrong .slot-num { background: var(--red); }
+
+  /* ── COLOREAR ARRASTRE ── */
+  .color-targets { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; }
+  .color-drop {
+    border: 4px dashed #BDBDBD;
+    border-radius: 16px;
+    padding: 10px 14px;
+    font-size: 14px; font-weight: 800;
+    min-width: 130px; min-height: 60px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+  }
+  .color-drop.drop-ok { border-style: solid; }
+  .color-palette { display: flex; gap: 10px; flex-wrap: wrap; }
+  .color-swatch {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    cursor: pointer;
+    font-size: 11px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    transition: transform 0.1s;
+  }
+  .color-swatch:hover { transform: scale(1.1); }
+  .color-swatch.selected { border-color: #000; transform: scale(1.12); }
+
+  /* ── ICONOS APP ── */
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .icon-card {
+    border: 4px solid #E0E0E0;
+    border-radius: 14px;
+    padding: 12px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.15s;
+    background: white;
+  }
+  .icon-card:hover:not(.locked) { transform: scale(1.05); border-color: var(--purple); }
+  .icon-card .icon-img { width: 56px; height: 56px; object-fit: contain; }
+  .icon-card .icon-name { font-size: 11px; font-weight: 800; text-align: center; color: var(--muted); }
+  .icon-card.ic-correct { border-color: var(--green); background: #E8F5E9; }
+  .icon-card.ic-wrong { border-color: var(--red); background: #FFEBEE; animation: shake .4s; }
+  .icon-card.locked { pointer-events: none; }
+
+  /* ── FEEDBACK ── */
+  .feedback-msg {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 900;
+    padding: 8px 0 0;
+    min-height: 28px;
+  }
+  .fb-good { color: var(--green-dark); }
+  .fb-bad { color: var(--red); }
+
+  /* ── BOTÓN SIGUIENTE ── */
+  .btn-next {
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 36px;
+    font-size: 17px;
+    font-weight: 900;
+    cursor: pointer;
+    margin-top: 1rem;
+    font-family: 'Nunito', sans-serif;
+    box-shadow: 0 6px 0 var(--orange-dark);
+    transition: transform 0.1s, box-shadow 0.1s;
+    display: none;
+  }
+  .btn-next.visible { display: inline-block; }
+  .btn-next:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--orange-dark); }
+
+  /* ── PROGRESO ── */
+  .progress-wrap { width: 100%; max-width: 680px; margin-bottom: 1rem; }
+  .progress-bar {
+    height: 12px;
+    background: #E0E0E0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--purple));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+  }
+  .progress-label { font-size: 12px; color: var(--muted); font-weight: 700; margin-top: 4px; text-align: right; }
+
+  /* ── RESULTADO FINAL ── */
+  #screen-result {
+    background: linear-gradient(160deg, #FF8C42 0%, #9C59D1 100%);
+    justify-content: center;
+    text-align: center;
+  }
+  .result-card {
+    background: white;
+    border-radius: 28px;
+    padding: 2rem 1.5rem;
+    width: 100%; max-width: 500px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  }
+  .result-trophy { font-size: 80px; margin-bottom: 0.4rem; }
+  .result-title { font-size: 28px; font-weight: 900; color: var(--purple); margin-bottom: 0.2rem; }
+  .result-stars { font-size: 26px; margin-bottom: 1rem; }
+  .result-score { font-size: 48px; font-weight: 900; color: var(--orange); }
+  .result-sub { font-size: 14px; color: var(--muted); font-weight: 700; margin-bottom: 1.2rem; }
+  .result-review { text-align: left; margin-top: 1rem; }
+  .review-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #F0F0F0;
+    font-size: 13px; font-weight: 700;
+  }
+  .review-icon { font-size: 18px; flex-shrink: 0; }
+  .btn-reset {
+    background: var(--purple);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-size: 15px; font-weight: 900;
+    cursor: pointer;
+    margin-top: 1.4rem;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* ── ANIMACIONES ── */
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)}
+  }
+  @keyframes pop {
+    0%{transform:scale(0.7);opacity:0} 80%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1}
+  }
+  .pop { animation: pop 0.35s ease; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 420px) {
+    .opts-grid { grid-template-columns: 1fr 1fr; }
+    .icon-grid { grid-template-columns: repeat(3, 1fr); }
+    .opt-btn .opt-icon { font-size: 30px; }
+    .welcome-title { font-size: 28px; }
+  }
+
+  /* Clasificación Cable/WiFi: tarjetas de arrastre */
+  .classify-wrap { display: flex; flex-direction: column; gap: 12px; }
+  .classify-devices { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .device-chip {
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 14px; font-weight: 800;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  .device-chip:hover { transform: scale(1.05); }
+  .device-chip.placed { opacity: 0.35; pointer-events: none; }
+  .classify-zones { display: flex; gap: 10px; }
+  .class-zone {
+    flex: 1;
+    border: 3px dashed #BDBDBD;
+    border-radius: 14px;
+    padding: 10px;
+    min-height: 100px;
+  }
+  .class-zone-title {
+    font-size: 13px; font-weight: 900; text-align: center;
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+  .zone-cable .class-zone-title { background: #E8F5E9; color: var(--green-dark); }
+  .zone-wifi .class-zone-title { background: #E3F2FD; color: var(--blue-dark); }
+  .class-zone-items { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; }
+  .placed-chip {
+    background: #F5F5F5;
+    border: 2px solid #E0E0E0;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; gap: 4px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .placed-chip:hover { border-color: var(--red); }
+  .zone-cable .placed-chip { border-color: var(--green); }
+  .zone-wifi .placed-chip { border-color: var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!--  PANTALLA 0: BIENVENIDA                           -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-avatar">🦜</div>
+  <div class="welcome-title">¡Hola, Santiago!</div>
+  <div class="welcome-sub">Examen de Formación Tecnológica · 5.° grado</div>
+  <div class="welcome-stars">⭐ ⭐ ⭐ ⭐ ⭐</div>
+  <button class="btn-start" onclick="startGame()">¡Empezar!</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!--  PANTALLA PRINCIPAL DEL EXAMEN                   -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="top-bar">
+    <div class="stars-display" id="score-display">⭐ 0</div>
+    <button class="audio-fab" onclick="repeatCurrentAudio()">🔊 Repetir</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Actividad 1 de 6</div>
+  </div>
+  <div id="activity-container"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!--  PANTALLA RESULTADO FINAL                         -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="screen-result" class="screen">
+  <div class="result-card pop">
+    <div class="result-trophy" id="result-trophy">🏆</div>
+    <div class="result-title" id="result-title">¡Felicidades!</div>
+    <div class="result-stars" id="result-stars">⭐⭐⭐⭐⭐</div>
+    <div class="result-score" id="result-score">10/10</div>
+    <div class="result-sub" id="result-sub">puntos obtenidos</div>
+    <div class="result-review" id="result-review"></div>
+    <button class="btn-reset" onclick="location.reload()">🔄 Jugar de nuevo</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  VOZ FEMENINA EN ESPAÑOL
+// ══════════════════════════════════════════════════════
+let voiceReady = false;
+let femaleVoice = null;
+let currentAudioText = '';
+
+function loadVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  const esPref = ['es-MX','es-419','es-CO','es-US','es-ES','es'];
+  for (const lang of esPref) {
+    const match = voices.find(v => v.lang.toLowerCase().startsWith(lang.toLowerCase()) && v.name.toLowerCase().includes('female'));
+    if (match) { femaleVoice = match; break; }
+  }
+  if (!femaleVoice) {
+    for (const lang of esPref) {
+      const match = voices.find(v => v.lang.toLowerCase().startsWith(lang.toLowerCase()));
+      if (match) { femaleVoice = match; break; }
+    }
+  }
+  voiceReady = true;
+}
+
+window.speechSynthesis.onvoiceschanged = loadVoice;
+loadVoice();
+
+function speak(text, onEnd) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  currentAudioText = text;
+  const u = new SpeechSynthesisUtterance(text);
+  if (femaleVoice) u.voice = femaleVoice;
+  u.lang = 'es-MX';
+  u.rate = 0.88;
+  u.pitch = 1.12;
+  u.volume = 1;
+  if (onEnd) u.onend = onEnd;
+  window.speechSynthesis.speak(u);
+}
+
+function repeatCurrentAudio() { speak(currentAudioText); }
+
+// ══════════════════════════════════════════════════════
+//  ESTADO DEL JUEGO
+// ══════════════════════════════════════════════════════
+let currentActivity = 0;
+let totalScore = 0;
+let maxScore = 0;
+let activityResults = [];
+const TOTAL_ACTS = 6;
+
+function updateProgress() {
+  const pct = Math.round((currentActivity / TOTAL_ACTS) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = 'Actividad ' + (currentActivity + 1) + ' de ' + TOTAL_ACTS;
+}
+
+function addScore(pts) {
+  totalScore += pts;
+  document.getElementById('score-display').textContent = '⭐ ' + totalScore;
+}
+
+function startGame() {
+  document.getElementById('screen-welcome').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  speak('¡Bienvenido, Santiago! Vamos a hacer tu examen de tecnología. Escucha bien las instrucciones y toca tu respuesta. ¡Tú puedes!', () => {
+    setTimeout(loadActivity, 400);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  ACTIVIDADES
+// ══════════════════════════════════════════════════════
+function loadActivity() {
+  updateProgress();
+  const container = document.getElementById('activity-container');
+  container.innerHTML = '';
+  switch (currentActivity) {
+    case 0: renderAct1(container); break;
+    case 1: renderAct2(container); break;
+    case 2: renderAct3(container); break;
+    case 3: renderAct4(container); break;
+    case 4: renderAct5(container); break;
+    case 5: renderAct6(container); break;
+    default: showResult(); break;
+  }
+}
+
+function nextActivity() {
+  currentActivity++;
+  if (currentActivity >= TOTAL_ACTS) {
+    showResult();
+  } else {
+    loadActivity();
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  ACTIVIDAD 1: ¿Qué parte es? (Hardware)
+// ══════════════════════════════════════════════════════
+function renderAct1(container) {
+  maxScore += 4;
+  const parts = [
+    { icon:'🖥️', name:'Monitor', q:'¿Cuál es el monitor?', correct: true,
+      audio:'¿Cuál de estos es el monitor? El monitor es la pantalla donde ves todo.' },
+    { icon:'⌨️', name:'Teclado', q:'¿Cuál es el teclado?', correct: true,
+      audio:'¿Cuál de estos es el teclado? El teclado sirve para escribir letras y números.' },
+  ];
+
+  const questions = [
+    {
+      q: '¿Cuál es el monitor?',
+      opts: [
+        { icon:'🖥️', name:'Monitor', correct: true },
+        { icon:'🖱️', name:'Ratón', correct: false },
+        { icon:'⌨️', name:'Teclado', correct: false },
+        { icon:'🖨️', name:'Impresora', correct: false }
+      ],
+      audio: '¡Actividad uno! Reconocemos las partes de la computadora. Pregunta uno: ¿Cuál de estos es el monitor? Toca la imagen correcta.',
+      maxPts: 2,
+      answered: false
+    },
+    {
+      q: '¿Cuál es el teclado?',
+      opts: [
+        { icon:'🖥️', name:'Monitor', correct: false },
+        { icon:'🖱️', name:'Ratón', correct: false },
+        { icon:'⌨️', name:'Teclado', correct: true },
+        { icon:'📷', name:'Cámara', correct: false }
+      ],
+      audio: 'Pregunta dos: ¿Cuál de estos es el teclado? El teclado tiene muchas teclas con letras.',
+      maxPts: 2,
+      answered: false
+    }
+  ];
+
+  let qIdx = 0;
+
+  function renderQuestion() {
+    container.innerHTML = '';
+    const q = questions[qIdx];
+    const card = document.createElement('div');
+    card.className = 'act-card pop';
+    card.innerHTML = `
+      <div class="act-header">
+        <span class="act-icon">💻</span>
+        <div>
+          <div class="act-title">Partes de la computadora</div>
+          <div class="act-instruction">${q.q}</div>
+        </div>
+      </div>
+      <div class="opts-grid" id="opts-grid-1"></div>
+      <div class="feedback-msg" id="fb1"></div>
+      <div style="text-align:center">
+        <button class="btn-next" id="btn-next-1" onclick="nextQ1()">Siguiente ▶</button>
+      </div>
+    `;
+    container.appendChild(card);
+
+    const grid = document.getElementById('opts-grid-1');
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.innerHTML = `<span class="opt-icon">${opt.icon}</span>${opt.name}`;
+      btn.onclick = () => {
+        if (q.answered) return;
+        q.answered = true;
+        document.querySelectorAll('#opts-grid-1 .opt-btn').forEach(b => b.disabled = true);
+        const fb = document.getElementById('fb1');
+        if (opt.correct) {
+          btn.classList.add('correct');
+          fb.textContent = '¡Correcto! ¡Muy bien, Santiago! 🎉';
+          fb.className = 'feedback-msg fb-good';
+          addScore(q.maxPts);
+          activityResults.push({ label: 'Partes: ' + q.q.replace('¿Cuál es el ','').replace('?',''), ok: true });
+          speak('¡Muy bien, Santiago! ¡Eso es correcto! Ganaste dos estrellas.');
+        } else {
+          btn.classList.add('wrong');
+          const correctBtn = document.querySelectorAll('#opts-grid-1 .opt-btn')[q.opts.findIndex(o => o.correct)];
+          if (correctBtn) correctBtn.classList.add('correct');
+          fb.textContent = 'La respuesta correcta era: ' + q.opts.find(o=>o.correct).name;
+          fb.className = 'feedback-msg fb-bad';
+          activityResults.push({ label: 'Partes: ' + q.q.replace('¿Cuál es el ','').replace('?',''), ok: false, correct: q.opts.find(o=>o.correct).name });
+          speak('Casi, Santiago. La respuesta correcta era ' + q.opts.find(o=>o.correct).name + '. ¡Sigue intentando!');
+        }
+        document.getElementById('btn-next-1').classList.add('visible');
+      };
+      grid.appendChild(btn);
+    });
+
+    speak(q.audio);
+  }
+
+  function nextQ1() {
+    qIdx++;
+    if (qIdx >= questions.length) {
+      nextActivity();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  window.nextQ1 = nextQ1;
+  renderQuestion();
+}
+
+// ══════════════════════════════════════════════════════
+//  ACTIVIDAD 2: Dispositivos de entrada o salida
+// ══════════════════════════════════════════════════════
+function renderAct2(container) {
+  maxScore += 6;
+  const items = [
+    { icon:'⌨️', name:'Teclado', type:'entrada' },
+    { icon:'🖱️', name:'Ratón', type:'entrada' },
+    { icon:'🖥️', name:'Monitor', type:'salida' },
+    { icon:'🖨️', name:'Impresora', type:'salida' },
+    { icon:'🎤', name:'Micrófono', type:'entrada' },
+    { icon:'🔊', name:'Bocinas', type:'salida' }
+  ];
+
+  let answered = 0;
+  let correct = 0;
+  const state = {};
+
+  const card = document.createElement('div');
+  card.className = 'act-card pop';
+  card.innerHTML = `
+    <div class="act-header">
+      <span class="act-icon">🔌</span>
+      <div>
+        <div class="act-title">Entrada o Salida</div>
+        <div class="act-instruction">Toca cada dispositivo: ¿es de ENTRADA o de SALIDA?</div>
+      </div>
+    </div>
+    <div id="io-items" style="display:flex;flex-direction:column;gap:10px;"></div>
+    <div class="feedback-msg" id="fb2"></div>
+    <div style="text-align:center">
+      <button class="btn-next" id="btn-next-2" onclick="nextActivity()">Siguiente ▶</button>
+    </div>
+  `;
+  container.appendChild(card);
+
+  const io = document.getElementById('io-items');
+  items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;background:#F9F9F9;border-radius:12px;padding:8px 12px;';
+    row.innerHTML = `
+      <span style="font-size:28px">${item.icon}</span>
+      <span style="font-size:14px;font-weight:800;flex:1">${item.name}</span>
+      <button class="opt-btn" id="btn-e-${idx}" style="min-height:44px;padding:6px 14px;font-size:13px;border-radius:10px;min-width:80px;" onclick="pickIO(${idx},'entrada')">ENTRADA</button>
+      <button class="opt-btn" id="btn-s-${idx}" style="min-height:44px;padding:6px 14px;font-size:13px;border-radius:10px;min-width:80px;" onclick="pickIO(${idx},'salida')">SALIDA</button>
+    `;
+    io.appendChild(row);
+  });
+
+  window.pickIO = function(idx, choice) {
+    if (state[idx]) return;
+    state[idx] = choice;
+    const item = items[idx];
+    const isOk = choice === item.type;
+    const btnE = document.getElementById('btn-e-'+idx);
+    const btnS = document.getElementById('btn-s-'+idx);
+    btnE.disabled = true; btnS.disabled = true;
+    if (isOk) {
+      (choice === 'entrada' ? btnE : btnS).classList.add('correct');
+      correct++;
+      addScore(1);
+    } else {
+      (choice === 'entrada' ? btnE : btnS).classList.add('wrong');
+      (item.type === 'entrada' ? btnE : btnS).classList.add('correct');
+    }
+    answered++;
+    activityResults.push({ label: item.name + ' → ' + item.type, ok: isOk, correct: item.type });
+    if (answered === items.length) {
+      const fb = document.getElementById('fb2');
+      fb.textContent = correct === items.length ? '¡Perfecto! Clasificaste todo correcto 🎉' : 'Completado. Revisa en verde las respuestas correctas.';
+      fb.className = 'feedback-msg ' + (correct === items.length ? 'fb-good' : 'fb-bad');
+      document.getElementById('btn-next-2').classList.add('visible');
+      speak(correct === items.length ? '¡Excelente Santiago! Clasificaste todos los dispositivos correctamente.' : 'Listo Santiago. Revisa las respuestas marcadas en verde.');
+    }
+  };
+
+  speak('¡Actividad dos! Dispositivos de entrada y salida. Toca ENTRADA si el dispositivo nos ayuda a enviar información a la computadora, o SALIDA si nos muestra o saca información. Clasifica cada uno.');
+}
+
+// ══════════════════════════════════════════════════════
+//  ACTIVIDAD 3: Algoritmo – Lavarse los dientes
+// ══════════════════════════════════════════════════════
+function renderAct3(container) {
+  maxScore += 5;
+  const correct_order = [
+    { icon:'🪥', text:'Tomar el cepillo' },
+    { icon:'🪣', text:'Poner pasta en el cepillo' },
+    { icon:'😁', text:'Cepillar los dientes' },
+    { icon:'💧', text:'Enjuagar la boca' },
+    { icon:'🫧', text:'Escupir el agua' }
+  ];
+
+  const shuffled = [...correct_order].sort(() => Math.random() - 0.5);
+  let slots = new Array(5).fill(null);
+  let selectedChip = null;
+
+  const card = document.createElement('div');
+  card.className = 'act-card pop';
+  card.innerHTML = `
+    <div class="act-header">
+      <span class="act-icon">🦷</span>
+      <div>
+        <div class="act-title">Algoritmo: ¡A lavarse los dientes!</div>
+        <div class="act-instruction">Toca un paso y luego toca el espacio donde va.</div>
+      </div>
+    </div>
+    <div class="steps-pool" id="pool3"></div>
+    <div class="steps-zone" id="zone3"></div>
+    <div class="feedback-msg" id="fb3"></div>
+    <div style="text-align:center">
+      <button class="btn-next" id="btn-check-3" style="background:var(--green);box-shadow:0 6px 0 var(--green-dark);" onclick="checkAlgo3()" class="btn-next visible">Revisar orden ✔</button>
+    </div>
+    <div style="text-align:center;margin-top:8px">
+      <button class="btn-next" id="btn-next-3" onclick="nextActivity()" style="display:none;">Siguiente ▶</button>
+    </div>
+  `;
+  container.appendChild(card);
+
+  // Pool chips
+  const pool = document.getElementById('pool3');
+  shuffled.forEach((step, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'step-chip';
+    chip.id = 'chip3-' + i;
+    chip.dataset.idx = shuffled.indexOf(step);
+    chip.innerHTML = step.icon + ' ' + step.text;
+    chip.onclick = () => {
+      document.querySelectorAll('.step-chip').forEach(c => c.style.outline = '');
+      if (!chip.classList.contains('placed')) {
+        selectedChip = chip;
+        chip.style.outline = '3px solid yellow';
+        speak('Seleccionaste: ' + step.text + '. Ahora toca el espacio donde quieres colocarlo.');
+      }
+    };
+    pool.appendChild(chip);
+  });
+
+  // Slots
+  const zone = document.getElementById('zone3');
+  for (let i = 0; i < 5; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'step-slot';
+    slot.id = 'slot3-' + i;
+    slot.innerHTML = `<div class="slot-num">${i+1}</div><span id="slot3-txt-${i}" style="flex:1">Toca aquí para colocar un paso</span>`;
+    slot.onclick = () => {
+      if (!selectedChip) { speak('Primero toca un paso de la lista de arriba.'); return; }
+      const chipOrigIdx = parseInt(selectedChip.dataset.idx);
+      // If slot already has something, return chip to pool
+      if (slots[i] !== null) {
+        const prevChip = document.getElementById('chip3-' + slots[i].chipId);
+        if (prevChip) prevChip.classList.remove('placed');
+      }
+      slots[i] = { chipId: selectedChip.id.replace('chip3-',''), text: selectedChip.textContent.trim(), origIdx: chipOrigIdx };
+      document.getElementById('slot3-txt-' + i).textContent = selectedChip.textContent.trim();
+      slot.classList.add('filled');
+      selectedChip.classList.add('placed');
+      selectedChip.style.outline = '';
+      selectedChip = null;
+      speak('Colocado en la posición ' + (i+1) + '.');
+    };
+    zone.appendChild(slot);
+  }
+
+  window.checkAlgo3 = function() {
+    let pts = 0;
+    let allFilled = slots.every(s => s !== null);
+    if (!allFilled) { speak('Por favor coloca todos los pasos antes de revisar.'); return; }
+    for (let i = 0; i < 5; i++) {
+      const slot = document.getElementById('slot3-' + i);
+      if (slots[i].origIdx === i) {
+        slot.classList.add('slot-correct');
+        pts++;
+      } else {
+        slot.classList.add('slot-wrong');
+        activityResults.push({ label: 'Dientes paso '+(i+1), ok: false, correct: correct_order[i].icon+' '+correct_order[i].text });
+      }
+    }
+    addScore(pts);
+    if (pts === 5) activityResults.push({ label: 'Algoritmo dientes', ok: true });
+    const fb = document.getElementById('fb3');
+    fb.textContent = pts === 5 ? '¡Perfecto! El orden es correcto 🎉' : pts + ' de 5 correctos. Revisa en verde los pasos correctos.';
+    fb.className = 'feedback-msg ' + (pts === 5 ? 'fb-good' : 'fb-bad');
+    document.getElementById('btn-check-3').style.display = 'none';
+    document.getElementById('btn-next-3').style.display = 'inline-block';
+    speak(pts === 5 ? '¡Perfecto Santiago! El orden de lavarse los dientes es correcto.' : 'Completado. Tienes ' + pts + ' de cinco pasos en el lugar correcto. Los pasos en verde están bien.');
+  };
+
+  speak('¡Actividad tres! Algoritmos cotidianos. Vamos a ordenar los pasos para lavarse los dientes. Toca un paso de arriba y luego toca el espacio numerado donde crees que va. Cuando termines, toca el botón Revisar orden.');
+}
+
+// ══════════════════════════════════════════════════════
+//  ACTIVIDAD 4: Algoritmo – Hacer un emparedado
+// ══════════════════════════════════════════════════════
+function renderAct4(container) {
+  maxScore += 4;
+  const correct_order = [
+    { icon:'🍞', text:'Tomar dos rebanadas de pan' },
+    { icon:'🧈', text:'Untar mantequilla en el pan' },
+    { icon:'🧀', text:'Poner el relleno encima' },
+    { icon:'🥪', text:'Cerrar el emparedado' }
+  ];
+
+  const shuffled = [...correct_order].sort(() => Math.random() - 0.5);
+  let slots = new Array(4).fill(null);
+  let selectedChip = null;
+
+  const card = document.createElement('div');
+  card.className = 'act-card pop';
+  card.innerHTML = `
+    <div class="act-header">
+      <span class="act-icon">🥪</span>
+      <div>
+        <div class="act-title">Algoritmo: ¡Hagamos un emparedado!</div>
+        <div class="act-instruction">Toca un paso y luego toca el espacio donde va.</div>
+      </div>
+    </div>
+    <div class="steps-pool" id="pool4"></div>
+    <div class="steps-zone" id="zone4"></div>
+    <div class="feedback-msg" id="fb4"></div>
+    <div style="text-align:center">
+      <button class="btn-next" id="btn-check-4" style="background:var(--green);box-shadow:0 6px 0 var(--green-dark);display:inline-block;" onclick="checkAlgo4()">Revisar orden ✔</button>
+    </div>
+    <div style="text-align:center;margin-top:8px">
+      <button class="btn-next" id="btn-next-4" onclick="nextActivity()" style="display:none;">Siguiente ▶</button>
+    </div>
+  `;
+  container.appendChild(card);
+
+  const pool = document.getElementById('pool4');
+  shuffled.forEach((step, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'step-chip';
+    chip.id = 'chip4-' + i;
+    chip.dataset.origIdx = correct_order.findIndex(c => c.text === step.text);
+    chip.innerHTML = step.icon + ' ' + step.text;
+    chip.onclick = () => {
+      document.querySelectorAll('.step-chip').forEach(c => c.style.outline = '');
+      if (!chip.classList.contains('placed')) {
+        selectedChip = chip;
+        chip.style.outline = '3px solid yellow';
+        speak('Seleccionaste: ' + step.text);
+      }
+    };
+    pool.appendChild(chip);
+  });
+
+  const zone = document.getElementById('zone4');
+  for (let i = 0; i < 4; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'step-slot';
+    slot.id = 'slot4-' + i;
+    slot.innerHTML = `<div class="slot-num">${i+1}</div><span id="slot4-txt-${i}" style="flex:1">Toca aquí para colocar un paso</span>`;
+    slot.onclick = () => {
+      if (!selectedChip) { speak('Primero toca un paso de la lista.'); return; }
+      if (slots[i] !== null) {
+        const prev = document.getElementById('chip4-' + slots[i].chipId);
+        if (prev) prev.classList.remove('placed');
+      }
+      slots[i] = { chipId: selectedChip.id.replace('chip4-',''), text: selectedChip.textContent.trim(), origIdx: parseInt(selectedChip.dataset.origIdx) };
+      document.getElementById('slot4-txt-' + i).textContent = selectedChip.textContent.trim();
+      slot.classList.add('filled');
+      selectedChip.classList.add('placed');
+      selectedChip.style.outline = '';
+      selectedChip = null;
+      speak('Colocado en el paso ' + (i+1) + '.');
+    };
+    zone.appendChild(slot);
+  }
+
+  window.checkAlgo4 = function() {
+    let pts = 0;
+    if (slots.some(s => s === null)) { speak('Coloca todos los pasos antes de revisar.'); return; }
+    for (let i = 0; i < 4; i++) {
+      const slot = document.getElementById('slot4-' + i);
+      if (slots[i].origIdx === i) { slot.classList.add('slot-correct'); pts++; }
+      else {
+        slot.classList.add('slot-wrong');
+        activityResults.push({ label: 'Emparedado paso '+(i+1), ok: false, correct: correct_order[i].icon+' '+correct_order[i].text });
+      }
+    }
+    addScore(pts);
+    if (pts === 4) activityResults.push({ label: 'Algoritmo emparedado', ok: true });
+    const fb = document.getElementById('fb4');
+    fb.textContent = pts === 4 ? '¡Excelente! ¡El emparedado quedó perfecto! 🎉' : pts + ' de 4 correctos.';
+    fb.className = 'feedback-msg ' + (pts === 4 ? 'fb-good' : 'fb-bad');
+    document.getElementById('btn-check-4').style.display = 'none';
+    document.getElementById('btn-next-4').style.display = 'inline-block';
+    speak(pts === 4 ? '¡Excelente Santiago! Ordenaste bien los pasos del emparedado.' : 'Listo, tienes ' + pts + ' pasos correctos de cuatro.');
+  };
+
+  speak('¡Actividad cuatro! Ahora vamos a ordenar los pasos para hacer un emparedado. Toca cada paso y colócalo en el número que le corresponde. Cuando termines, toca Revisar orden.');
+}
+
+// ══════════════════════════════════════════════════════
+//  ACTIVIDAD 5: Cable vs WiFi – Clasificar
+// ══════════════════════════════════════════════════════
+function renderAct5(container) {
+  maxScore += 6;
+  const devices = [
+    { icon:'🖥️', name:'Computadora de escritorio', correct:'cable' },
+    { icon:'📱', name:'Celular', correct:'wifi' },
+    { icon:'🎮', name:'Videojuego portátil', correct:'wifi' },
+    { icon:'📡', name:'Router WiFi', correct:'cable' },
+    { icon:'💻', name:'Laptop en el escritorio', correct:'cable' },
+    { icon:'📺', name:'Televisión inteligente', correct:'wifi' }
+  ];
+
+  const state = {};
+  let answered = 0;
+
+  const card = document.createElement('div');
+  card.className = 'act-card pop';
+  card.innerHTML = `
+    <div class="act-header">
+      <span class="act-icon">📡</span>
+      <div>
+        <div class="act-title">Cable o WiFi</div>
+        <div class="act-instruction">¿Cada dispositivo usa CABLE o WIFI para conectarse?</div>
+      </div>
+    </div>
+    <div id="io5" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div class="feedback-msg" id="fb5"></div>
+    <div style="text-align:center">
+      <button class="btn-next" id="btn-next-5" onclick="nextActivity()">Siguiente ▶</button>
+    </div>
+  `;
+  container.appendChild(card);
+
+  const io = document.getElementById('io5');
+  devices.forEach((d, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:#F9F9F9;border-radius:12px;padding:8px 12px;';
+    row.innerHTML = `
+      <span style="font-size:24px">${d.icon}</span>
+      <span style="font-size:13px;font-weight:800;flex:1">${d.name}</span>
+      <button class="opt-btn" id="c5-e-${i}" style="min-height:40px;padding:5px 12px;font-size:12px;border-radius:10px;min-width:72px;" onclick="pick5(${i},'cable')">🔌 CABLE</button>
+      <button class="opt-btn" id="c5-w-${i}" style="min-height:40px;padding:5px 12px;font-size:12px;border-radius:10px;min-width:72px;" onclick="pick5(${i},'wifi')">📶 WIFI</button>
+    `;
+    io.appendChild(row);
+  });
+
+  window.pick5 = function(i, choice) {
+    if (state[i]) return;
+    state[i] = choice;
+    const d = devices[i];
+    const ok = choice === d.correct;
+    const btnC = document.getElementById('c5-e-'+i);
+    const btnW = document.getElementById('c5-w-'+i);
+    btnC.disabled = true; btnW.disabled = true;
+    if (ok) { (choice==='cable'?btnC:btnW).classList.add('correct'); addScore(1); }
+    else {
+      (choice==='cable'?btnC:btnW).classList.add('wrong');
+      (d.correct==='cable'?btnC:btnW).classList.add('correct');
+    }
+    activityResults.push({ label: d.name, ok, correct: d.correct === 'cable' ? '🔌 CABLE' : '📶 WIFI' });
+    answered++;
+    if (answered === devices.length) {
+      const cor = activityResults.filter(r => r.label === d.name ? ok : true).length;
+      const fb = document.getElementById('fb5');
+      fb.className = 'feedback-msg fb-good';
+      fb.textContent = 'Actividad completada 🎉';
+      document.getElementById('btn-next-5').classList.add('visible');
+      speak('¡Muy bien Santiago! Terminaste la actividad de cable y WiFi.');
+    }
+  };
+
+  speak('¡Actividad cinco! Cable o WiFi. Cada dispositivo de la lista se conecta a internet con CABLE o con WIFI. Toca la respuesta correcta para cada uno.');
+}
+
+// ══════════════════════════════════════════════════════
+//  ACTIVIDAD 6: Reconocer íconos de Word y PowerPoint
+// ══════════════════════════════════════════════════════
+function renderAct6(container) {
+  maxScore += 4;
+
+  const questions = [
+    {
+      q: '¿Cuál de estos íconos es Microsoft Word?',
+      audio: '¡Última actividad, Santiago! Reconocemos íconos de programas. Pregunta uno: ¿Cuál de estos íconos es el de Microsoft Word? Word es el programa para escribir documentos.',
+      opts: [
+        { color:'#2B579A', letter:'W', name:'Microsoft Word', correct: true, bg:'#EBF0FA' },
+        { color:'#D24726', letter:'P', name:'Microsoft PowerPoint', correct: false, bg:'#FDEDE8' },
+        { color:'#217346', letter:'X', name:'Microsoft Excel', correct: false, bg:'#E8F5EE' },
+        { color:'#0078D4', letter:'O', name:'Microsoft Outlook', correct: false, bg:'#E8F2FC' }
+      ],
+      answered: false, maxPts: 2
+    },
+    {
+      q: '¿Cuál de estos íconos es Microsoft PowerPoint?',
+      audio: 'Pregunta dos: ¿Cuál de estos íconos es el de Microsoft PowerPoint? PowerPoint es el programa para hacer presentaciones con diapositivas.',
+      opts: [
+        { color:'#2B579A', letter:'W', name:'Microsoft Word', correct: false, bg:'#EBF0FA' },
+        { color:'#D24726', letter:'P', name:'Microsoft PowerPoint', correct: true, bg:'#FDEDE8' },
+        { color:'#217346', letter:'X', name:'Microsoft Excel', correct: false, bg:'#E8F5EE' },
+        { color:'#0F7B6C', letter:'N', name:'Microsoft OneNote', correct: false, bg:'#E8F5F3' }
+      ],
+      answered: false, maxPts: 2
+    }
+  ];
+
+  let qIdx = 0;
+
+  function renderQ() {
+    container.innerHTML = '';
+    const q = questions[qIdx];
+    const card = document.createElement('div');
+    card.className = 'act-card pop';
+    card.innerHTML = `
+      <div class="act-header">
+        <span class="act-icon">💼</span>
+        <div>
+          <div class="act-title">Íconos de Microsoft Office</div>
+          <div class="act-instruction">${q.q}</div>
+        </div>
+      </div>
+      <div class="icon-grid" id="icon-grid-6"></div>
+      <div class="feedback-msg" id="fb6"></div>
+      <div style="text-align:center">
+        <button class="btn-next" id="btn-next-6" onclick="nextQ6()">Siguiente ▶</button>
+      </div>
+    `;
+    container.appendChild(card);
+
+    const grid = document.getElementById('icon-grid-6');
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'icon-card';
+      btn.innerHTML = `
+        <div style="width:64px;height:64px;background:${opt.bg};border-radius:14px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:38px;font-weight:900;color:${opt.color};font-family:'Calibri',sans-serif;">${opt.letter}</span>
+        </div>
+        <div class="icon-name">${opt.name}</div>
+      `;
+      btn.onclick = () => {
+        if (q.answered) return;
+        q.answered = true;
+        document.querySelectorAll('#icon-grid-6 .icon-card').forEach(b => b.classList.add('locked'));
+        const fb = document.getElementById('fb6');
+        if (opt.correct) {
+          btn.classList.add('ic-correct');
+          fb.textContent = '¡Correcto! ¡Eso es ' + opt.name + '! 🎉';
+          fb.className = 'feedback-msg fb-good';
+          addScore(q.maxPts);
+          activityResults.push({ label: q.q.includes('Word') ? 'Ícono de Word' : 'Ícono de PowerPoint', ok: true });
+          speak('¡Perfecto Santiago! Eso es ' + opt.name + '. ¡Ganaste dos estrellas!');
+        } else {
+          btn.classList.add('ic-wrong');
+          const corrBtn = document.querySelectorAll('#icon-grid-6 .icon-card')[q.opts.findIndex(o => o.correct)];
+          if (corrBtn) corrBtn.classList.add('ic-correct');
+          fb.textContent = 'La respuesta correcta era: ' + q.opts.find(o=>o.correct).name;
+          fb.className = 'feedback-msg fb-bad';
+          activityResults.push({ label: q.q.includes('Word') ? 'Ícono de Word' : 'Ícono de PowerPoint', ok: false, correct: q.opts.find(o=>o.correct).name });
+          speak('Casi. La respuesta correcta era ' + q.opts.find(o=>o.correct).name + '.');
+        }
+        document.getElementById('btn-next-6').classList.add('visible');
+      };
+      grid.appendChild(btn);
+    });
+
+    speak(q.audio);
+  }
+
+  function nextQ6() {
+    qIdx++;
+    if (qIdx >= questions.length) {
+      nextActivity();
+    } else {
+      renderQ();
+    }
+  }
+
+  window.nextQ6 = nextQ6;
+  renderQ();
+}
+
+// ══════════════════════════════════════════════════════
+//  RESULTADO FINAL
+// ══════════════════════════════════════════════════════
+function showResult() {
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-result').classList.add('active');
+
+  const pct = Math.round((totalScore / maxScore) * 100);
+  let trophy = '🏆'; let title = '¡Excelente, Santiago!'; let stars = '⭐⭐⭐⭐⭐';
+  if (pct < 60) { trophy = '💪'; title = '¡Muy bien, Santiago!'; stars = '⭐⭐⭐'; }
+  else if (pct < 80) { trophy = '🌟'; title = '¡Buen trabajo, Santiago!'; stars = '⭐⭐⭐⭐'; }
+
+  document.getElementById('result-trophy').textContent = trophy;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-stars').textContent = stars;
+  document.getElementById('result-score').textContent = totalScore + ' / ' + maxScore;
+  document.getElementById('result-sub').textContent = 'puntos obtenidos · ' + pct + '%';
+
+  const review = document.getElementById('result-review');
+  review.innerHTML = '<div style="font-size:14px;font-weight:900;color:var(--muted);margin-bottom:8px;">Repaso de respuestas:</div>';
+  activityResults.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'review-row';
+    row.innerHTML = `
+      <span class="review-icon">${r.ok ? '✅' : '❌'}</span>
+      <div>
+        <div style="font-weight:800">${r.label}</div>
+        ${!r.ok && r.correct ? '<div style="font-size:12px;color:var(--muted);">Correcto: ' + r.correct + '</div>' : ''}
+      </div>
+    `;
+    review.appendChild(row);
+  });
+
+  const msg = pct >= 80
+    ? '¡Felicidades, Santiago! Terminaste tu examen con ' + totalScore + ' de ' + maxScore + ' puntos. ¡Eso es un ' + pct + ' por ciento! ¡Eres increíble!'
+    : 'Muy bien Santiago. Terminaste tu examen con ' + totalScore + ' de ' + maxScore + ' puntos. ¡Sigue practicando, tú puedes!';
+  setTimeout(() => speak(msg), 500);
+}
+
+// Lanzar intro de voz al cargar
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    speak('¡Hola Santiago! Bienvenido a tu examen de Formación Tecnológica de quinto grado. Cuando estés listo, toca el botón que dice Empezar.');
+  }, 800);
+});
+</script>
+</body>
+</html>
